@@ -8,7 +8,6 @@ const getStats = async (req, res) => {
     const [[{ occupiedRooms }]] = await pool.query("SELECT COUNT(*) as occupiedRooms FROM rooms WHERE status='occupied'");
     const [[{ pendingComplaints }]] = await pool.query("SELECT COUNT(*) as pendingComplaints FROM complaints WHERE status='pending'");
     const [[{ resolvedComplaints }]] = await pool.query("SELECT COUNT(*) as resolvedComplaints FROM complaints WHERE status='resolved'");
-    const [[{ feesPending }]]   = await pool.query("SELECT COUNT(*) as feesPending FROM students WHERE fee_status='pending'");
 
     const [blockStats] = await pool.query(
       "SELECT block, SUM(capacity) as capacity, SUM(occupied) as occupied FROM rooms GROUP BY block ORDER BY block"
@@ -22,7 +21,7 @@ const getStats = async (req, res) => {
 
     res.json({
       success: true,
-      stats: { totalStudents, totalRooms, availableRooms, occupiedRooms, pendingComplaints, resolvedComplaints, feesPending },
+      stats: { totalStudents, totalRooms, availableRooms, occupiedRooms, pendingComplaints, resolvedComplaints },
       blockStats,
       recentStudents,
       recentComplaints,

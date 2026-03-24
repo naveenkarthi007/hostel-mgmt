@@ -3,13 +3,12 @@ const { Parser } = require('json2csv');
 
 const getAll = async (req, res) => {
   try {
-    const { search, dept, year, fee_status, page = 1, limit = 20 } = req.query;
+    const { search, dept, year, page = 1, limit = 20 } = req.query;
     let where = '1=1';
     const params = [];
     if (search) { where += ' AND (s.name LIKE ? OR s.register_no LIKE ? OR s.email LIKE ?)'; const q = `%${search}%`; params.push(q,q,q); }
     if (dept)   { where += ' AND s.department=?'; params.push(dept); }
     if (year)   { where += ' AND s.year=?'; params.push(year); }
-    if (fee_status) { where += ' AND s.fee_status=?'; params.push(fee_status); }
 
     const offset = (parseInt(page)-1) * parseInt(limit);
     const [rows] = await pool.query(
@@ -35,13 +34,13 @@ const getOne = async (req, res) => {
 };
 
 const create = async (req, res) => {
-  const { name, register_no, department, year, phone, email, address, fee_status, joined_date } = req.body;
+  const { name, register_no, department, year, phone, email, address, joined_date } = req.body;
   if (!name || !register_no || !department || !year)
     return res.status(400).json({ success: false, message: 'Name, register_no, department and year are required.' });
   try {
     const [result] = await pool.query(
-      'INSERT INTO students (name,register_no,department,year,phone,email,address,fee_status,joined_date) VALUES (?,?,?,?,?,?,?,?,?)',
-      [name,register_no,department,year,phone,email,address,fee_status||'pending',joined_date||new Date()]
+      'INSERT INTO students (name,register_no,department,year,phone,email,address,joined_date) VALUES (?,?,?,?,?,?,?,?)',
+      [name,register_no,department,year,phone,email,address,joined_date||new Date()]
     );
     res.status(201).json({ success: true, message: 'Student created.', id: result.insertId });
   } catch (err) {
@@ -51,11 +50,11 @@ const create = async (req, res) => {
 };
 
 const update = async (req, res) => {
-  const { name, department, year, phone, email, address, fee_status } = req.body;
+  const { name, department, year, phone, email, address } = req.body;
   try {
     await pool.query(
-      'UPDATE students SET name=?,department=?,year=?,phone=?,email=?,address=?,fee_status=? WHERE id=?',
-      [name,department,year,phone,email,address,fee_status,req.params.id]
+      'UPDATE students SET name=?,department=?,year=?,phone=?,email=?,address=? WHERE id=?',
+      [name,department,year,phone,email,address,req.params.id]
     );
     res.json({ success: true, message: 'Student updated.' });
   } catch (err) { res.status(500).json({ success: false, message: 'Server error.' }); }
@@ -76,9 +75,9 @@ const remove = async (req, res) => {
 const exportCSV = async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT s.name,s.register_no,s.department,s.year,s.phone,s.email,s.fee_status,r.room_number,r.block FROM students s LEFT JOIN rooms r ON s.room_id=r.id ORDER BY s.name'
+      'SELECT s.name,s.register_no,s.department,s.year,s.phone,s.email,r.room_number,r.block FROM students s LEFT JOIN rooms r ON s.room_id=r.id ORDER BY s.name'
     );
-    const parser = new Parser({ fields: ['name','register_no','department','year','phone','email','fee_status','room_number','block'] });
+    const parser = new Parser({ fields: ['name','register_no','department','year','phone','email','room_number','block'] });
     const csv = parser.parse(rows);
     res.header('Content-Type','text/csv');
     res.attachment('students.csv');

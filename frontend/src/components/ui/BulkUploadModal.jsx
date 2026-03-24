@@ -54,8 +54,16 @@ const BulkUploadModal = ({ isOpen, onClose, title, columns, sampleData, uploadEn
 
   const handleCellEdit = (rowIndex, field, value) => {
     const newData = [...data];
-    newData[rowIndex][field] = value;
+    newData[rowIndex] = { ...newData[rowIndex], [field]: value };
     setData(newData);
+  };
+
+  const appendEmptyRow = () => {
+    const newRow = {};
+    columns.forEach(col => {
+      newRow[col.key] = '';
+    });
+    setData([...data, newRow]);
   };
 
   const handleSubmit = async () => {
@@ -146,6 +154,21 @@ const BulkUploadModal = ({ isOpen, onClose, title, columns, sampleData, uploadEn
                 value={rawText}
                 onChange={handleTextChange}
               />
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex-1 h-px bg-gray-200"></div>
+                OR CREATE MANUALLY
+                <div className="flex-1 h-px bg-gray-200"></div>
+              </div>
+
+              <div className="flex justify-center mt-4">
+                <button
+                  type="button"
+                  onClick={appendEmptyRow}
+                  className="px-6 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-[#7D53F6] hover:bg-gray-50 transition-colors shadow-sm"
+                >
+                  + Add Empty Row
+                </button>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -199,6 +222,15 @@ const BulkUploadModal = ({ isOpen, onClose, title, columns, sampleData, uploadEn
                        Showing first 100 rows preview
                      </div>
                   )}
+                  <div className="p-2 border-t border-gray-100 bg-white">
+                    <button
+                      type="button"
+                      onClick={appendEmptyRow}
+                      className="w-full py-2 border-2 border-dashed border-gray-200 rounded-md text-sm font-medium text-gray-500 hover:text-[#7D53F6] hover:border-[#7D53F6]/40 hover:bg-[#7D53F6]/5 transition-all"
+                    >
+                      + Add Another Row
+                    </button>
+                  </div>
                 </div>
               </div>
               

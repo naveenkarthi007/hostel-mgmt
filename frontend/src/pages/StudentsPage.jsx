@@ -30,56 +30,10 @@ const defaultForm = {
   phone: '',
   email: '',
   address: '',
-  fee_status: 'pending',
   joined_date: '',
 };
 
 const pageSize = 15;
-
-const getFeeBadge = (status) => {
-  const base =
-    'inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold tracking-[0.3px] capitalize';
-
-  if (status === 'paid') {
-    return (
-      <span
-        className={base}
-        style={{
-          backgroundColor: 'rgba(0,128,0,0.12)',
-          color: COLORS.green,
-        }}
-      >
-        Paid
-      </span>
-    );
-  }
-
-  if (status === 'partial') {
-    return (
-      <span
-        className={base}
-        style={{
-          backgroundColor: 'rgba(240,176,65,0.14)',
-          color: COLORS.pending,
-        }}
-      >
-        Partial
-      </span>
-    );
-  }
-
-  return (
-    <span
-      className={base}
-      style={{
-        backgroundColor: 'rgba(220,38,38,0.12)',
-        color: COLORS.red,
-      }}
-    >
-      Pending
-    </span>
-  );
-};
 
 export default function StudentsPage() {
   const [students, setStudents] = useState([]);
@@ -91,15 +45,12 @@ export default function StudentsPage() {
   const [filters, setFilters] = useState({
     dept: '',
     year: '',
-    fee_status: '',
   });
-
   const [modal, setModal] = useState(null);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const [form, setForm] = useState(defaultForm);
   const [saving, setSaving] = useState(false);
-
   const [rooms, setRooms] = useState([]);
   const [allotRoomId, setAllotRoomId] = useState('');
 
@@ -159,7 +110,6 @@ export default function StudentsPage() {
       phone: student.phone || '',
       email: student.email || '',
       address: student.address || '',
-      fee_status: student.fee_status || 'pending',
       joined_date: student.joined_date?.slice(0, 10) || '',
     });
     setModal('edit');
@@ -302,16 +252,6 @@ export default function StudentsPage() {
         ))}
       </Select>
 
-      <Select
-        label="Fee Status"
-        value={form.fee_status}
-        onChange={(e) => handleInput('fee_status', e.target.value)}
-      >
-        <option value="pending">Pending</option>
-        <option value="paid">Paid</option>
-        <option value="partial">Partial</option>
-      </Select>
-
       <Input
         label="Phone Number"
         value={form.phone}
@@ -376,7 +316,7 @@ export default function StudentsPage() {
                 Student Records
               </h1>
               <p className="text-sm mt-2" style={{ color: COLORS.secondarytext }}>
-                Manage student details, fee tracking, and room allocation in one place.
+                Manage student details and room allocation in one place.
               </p>
             </div>
 
@@ -408,56 +348,6 @@ export default function StudentsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-            <div
-              className="rounded-2xl p-5 border"
-              style={{ backgroundColor: COLORS.primarybg, borderColor: '#D8DCF0' }}
-            >
-              <p className="text-sm" style={{ color: COLORS.secondarytext }}>
-                Total Students
-              </p>
-              <h3 className="text-2xl font-bold mt-2" style={{ color: COLORS.primary }}>
-                {total}
-              </h3>
-            </div>
-
-            <div
-              className="rounded-2xl p-5 border"
-              style={{ backgroundColor: COLORS.primarybg, borderColor: '#D8DCF0' }}
-            >
-              <p className="text-sm" style={{ color: COLORS.secondarytext }}>
-                Paid Fees
-              </p>
-              <h3 className="text-2xl font-bold mt-2" style={{ color: COLORS.green }}>
-                {students.filter((s) => s.fee_status === 'paid').length}
-              </h3>
-            </div>
-
-            <div
-              className="rounded-2xl p-5 border"
-              style={{ backgroundColor: COLORS.primarybg, borderColor: '#D8DCF0' }}
-            >
-              <p className="text-sm" style={{ color: COLORS.secondarytext }}>
-                Partial Fees
-              </p>
-              <h3 className="text-2xl font-bold mt-2" style={{ color: COLORS.pending }}>
-                {students.filter((s) => s.fee_status === 'partial').length}
-              </h3>
-            </div>
-
-            <div
-              className="rounded-2xl p-5 border"
-              style={{ backgroundColor: COLORS.primarybg, borderColor: '#D8DCF0' }}
-            >
-              <p className="text-sm" style={{ color: COLORS.secondarytext }}>
-                Pending Fees
-              </p>
-              <h3 className="text-2xl font-bold mt-2" style={{ color: COLORS.red }}>
-                {students.filter((s) => s.fee_status === 'pending').length}
-              </h3>
-            </div>
-          </div>
-
           <div
             className="rounded-2xl p-4 md:p-5 border mb-6"
             style={{
@@ -465,7 +355,7 @@ export default function StudentsPage() {
               borderColor: '#D8DCF0',
             }}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr_1fr_1fr] gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr_1fr] gap-3">
               <div className="relative">
                 <span
                   className="absolute left-4 top-1/2 -translate-y-1/2 text-sm"
@@ -532,24 +422,6 @@ export default function StudentsPage() {
                 ))}
               </select>
 
-              <select
-                value={filters.fee_status}
-                onChange={(e) => {
-                  setFilters((prev) => ({ ...prev, fee_status: e.target.value }));
-                  setPage(1);
-                }}
-                className="rounded-xl px-4 py-3 text-sm outline-none border"
-                style={{
-                  backgroundColor: COLORS.secondarybg,
-                  borderColor: '#D8DCF0',
-                  color: COLORS.primarytext,
-                }}
-              >
-                <option value="">All Fee Status</option>
-                <option value="paid">Paid</option>
-                <option value="pending">Pending</option>
-                <option value="partial">Partial</option>
-              </select>
             </div>
           </div>
 
@@ -569,7 +441,6 @@ export default function StudentsPage() {
                       'Student Name',
                       'Department & Year',
                       'Room',
-                      'Fee Status',
                       'Phone',
                       'Actions',
                     ].map((head) => (
@@ -591,7 +462,7 @@ export default function StudentsPage() {
                   {loading ? (
                     <tr>
                       <td
-                        colSpan="7"
+                        colSpan="6"
                         className="text-center py-12"
                         style={{ color: COLORS.secondarytext }}
                       >
@@ -601,7 +472,7 @@ export default function StudentsPage() {
                   ) : students.length === 0 ? (
                     <tr>
                       <td
-                        colSpan="7"
+                        colSpan="6"
                         className="text-center py-12"
                         style={{ color: COLORS.secondarytext }}
                       >
@@ -655,8 +526,6 @@ export default function StudentsPage() {
                             ? `${student.block?.[0] || ''}-${student.room_number}`
                             : '—'}
                         </td>
-
-                        <td className="px-5 py-4">{getFeeBadge(student.fee_status)}</td>
 
                         <td
                           className="px-5 py-4 font-mono text-[12px]"
@@ -837,7 +706,6 @@ export default function StudentsPage() {
                 >
                   {selected.register_no}
                 </p>
-                <div className="mt-2">{getFeeBadge(selected.fee_status)}</div>
               </div>
             </div>
 
@@ -998,7 +866,7 @@ export default function StudentsPage() {
             { key: 'phone', label: 'Phone Number' }
           ]}
           onSuccess={() => {
-            fetchStudents();
+            loadStudents();
           }}
         />
       )}

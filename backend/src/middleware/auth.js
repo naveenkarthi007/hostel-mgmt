@@ -22,4 +22,25 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
-module.exports = { authenticate, adminOnly };
+const roleCheck = (allowedRoles) => (req, res, next) => {
+  if (!allowedRoles.includes(req.user.role)) {
+    return res.status(403).json({ success: false, message: 'Access denied. Insufficient permissions.' });
+  }
+  next();
+};
+
+const caretakerOrAdmin = (req, res, next) => {
+  if (!['admin', 'caretaker'].includes(req.user.role)) {
+    return res.status(403).json({ success: false, message: 'Caretaker or Admin access required.' });
+  }
+  next();
+};
+
+const wardenOrAdmin = (req, res, next) => {
+  if (!['admin', 'warden'].includes(req.user.role)) {
+    return res.status(403).json({ success: false, message: 'Warden or Admin access required.' });
+  }
+  next();
+};
+
+module.exports = { authenticate, adminOnly, roleCheck, caretakerOrAdmin, wardenOrAdmin };

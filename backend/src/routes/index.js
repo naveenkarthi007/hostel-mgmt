@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authenticate, adminOnly } = require('../middleware/auth');
+const { authenticate, adminOnly, caretakerOrAdmin, wardenOrAdmin } = require('../middleware/auth');
 
 const authCtrl       = require('../controllers/authController');
 const dashCtrl       = require('../controllers/dashboardController');
@@ -9,8 +9,10 @@ const roomCtrl       = require('../controllers/roomController');
 const allocCtrl      = require('../controllers/allocationController');
 const complaintCtrl  = require('../controllers/complaintController');
 const noticeCtrl     = require('../controllers/noticeController');
-const studentPortal  = require('../controllers/studentPortalController');       
+const studentPortal  = require('../controllers/studentPortalController');
 const bulkCtrl       = require('../controllers/bulkController');
+const caretakerCtrl  = require('../controllers/caretakerController');
+const wardenCtrl     = require('../controllers/wardenController');
 const multer         = require('multer');
 
 const upload = multer({ dest: 'uploads/' });
@@ -20,8 +22,18 @@ router.post('/auth/google',          authCtrl.googleLogin);
 router.get ('/auth/me',              authenticate, authCtrl.me);
 router.put ('/auth/change-password', authenticate, authCtrl.changePassword);
 
-// ── Dashboard ────────────────────────────────────────────
+// ── Dashboard (Admin) ─────────────────────────────────────
 router.get('/dashboard', authenticate, adminOnly, dashCtrl.getStats);
+
+// ── Caretaker Dashboard ───────────────────────────────────
+router.get('/caretaker/dashboard', authenticate, caretakerOrAdmin, caretakerCtrl.getStats);
+router.get('/caretaker/complaints', authenticate, caretakerOrAdmin, caretakerCtrl.getComplaints);
+router.put('/caretaker/complaints/:id', authenticate, caretakerOrAdmin, caretakerCtrl.updateComplaintStatus);
+
+// ── Warden Dashboard ──────────────────────────────────────
+router.get('/warden/dashboard', authenticate, wardenOrAdmin, wardenCtrl.getStats);
+router.get('/warden/students', authenticate, wardenOrAdmin, wardenCtrl.getStudents);
+router.get('/warden/complaints', authenticate, wardenOrAdmin, wardenCtrl.getComplaints);
 
 // ── Students (Admin) ─────────────────────────────────────
 router.get   ('/students',         authenticate, adminOnly, studentCtrl.getAll);

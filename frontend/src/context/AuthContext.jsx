@@ -38,11 +38,13 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const isAdmin   = user?.role === 'admin';
-  const isStudent = user?.role === 'student';
+  const isAdmin      = user?.role === 'admin';
+  const isStudent    = user?.role === 'student';
+  const isCaretaker  = user?.role === 'caretaker';
+  const isWarden     = user?.role === 'warden';
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, googleLogin, logout, isAdmin, isStudent }}>
+    <AuthContext.Provider value={{ user, loading, login, googleLogin, logout, isAdmin, isStudent, isCaretaker, isWarden }}>
       {children}
     </AuthContext.Provider>
   );

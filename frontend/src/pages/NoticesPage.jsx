@@ -4,12 +4,7 @@ import { Button, Badge, Input, Select, Textarea, Modal, PageHeader } from '../co
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
-const INITIAL = [
-  { id: 1, title: 'Examination Period Outpass Policy Update', content: 'Evening outpass deadline extended to 7:30 PM for examination period. Students must return by 7:30 PM sharp.', category: 'urgent', target: 'all', created_at: new Date().toISOString() },
-  { id: 2, title: 'Water Supply Shutdown - 22 Mar (6-8 AM)', content: 'Planned maintenance work. Store water in advance. Inconvenience regretted.', category: 'maintenance', target: 'all', created_at: new Date(Date.now() - 86400000).toISOString() },
-  { id: 3, title: 'Semester Fee Due - Last Date 31 Mar', content: 'Students who have not paid the semester fee are requested to do so before 31st March to avoid penalty.', category: 'accounts', target: 'all', created_at: new Date(Date.now() - 2 * 86400000).toISOString() },
-  { id: 4, title: 'Yoga and Wellness Camp - Every Saturday 6 AM', content: 'All hostel students are invited to join the weekly yoga and wellness camp at the ground floor common area.', category: 'general', target: 'all', created_at: new Date(Date.now() - 5 * 86400000).toISOString() },
-];
+const INITIAL = [];
 
 const CAT_BADGE = { urgent: 'danger', general: 'info', maintenance: 'warning', accounts: 'primary', events: 'success' };
 
@@ -36,7 +31,7 @@ export default function NoticesPage() {
       <PageHeader
         eyebrow="Communication Centre"
         title="Notice Board"
-        description="Publish official hostel announcements, operational circulars, fee reminders, and student-facing updates within one academic communication stream."
+        description="Publish official hostel announcements, operational circulars, and student-facing updates within one academic communication stream."
         actions={<Button size="sm" onClick={() => setModal(true)}>Post Notice</Button>}
         meta={<Badge variant="default">{notices.length} published notices</Badge>}
       />

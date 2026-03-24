@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: '/api', timeout: 10000 });
+const api = axios.create({ baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api', timeout: 10000 });
 
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
@@ -28,6 +28,18 @@ export const authAPI = {
 
 export const dashboardAPI = {
   getStats: () => api.get('/dashboard'),
+};
+
+export const caretakerAPI = {
+  getStats:    ()  => api.get('/caretaker/dashboard'),
+  getComplaints: (p) => api.get('/caretaker/complaints', { params: p }),
+  updateComplaint: (id, d) => api.put(`/caretaker/complaints/${id}`, d),
+};
+
+export const wardenAPI = {
+  getStats:    ()  => api.get('/warden/dashboard'),
+  getStudents: (p) => api.get('/warden/students', { params: p }),
+  getComplaints: (p) => api.get('/warden/complaints', { params: p }),
 };
 
 export const studentsAPI = {

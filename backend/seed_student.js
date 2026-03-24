@@ -13,7 +13,7 @@ async function seed() {
     const userId = uRows[0].id;
 
     // Insert Student
-    await pool.query('INSERT IGNORE INTO students (user_id, name, register_no, department, year, email, fee_status) VALUES (?, ?, ?, ?, ?, ?, ?)', [userId, 'Test Student', '22CS001', 'CSE', 3, email, 'paid']);
+    await pool.query('INSERT IGNORE INTO students (user_id, name, register_no, department, year, email) VALUES (?, ?, ?, ?, ?, ?)', [userId, 'Test Student', '22CS001', 'CSE', 3, email]);
     console.log('Test student created successfully. Login with student@baithotel.edu / password');
   } catch (err) {
     console.error(err);

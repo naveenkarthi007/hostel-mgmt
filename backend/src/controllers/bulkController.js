@@ -49,15 +49,32 @@ exports.bulkStudents = async (req, res) => {
         if (existing.length > 0) {
           throw new Error('Email or register number already exists');
         }
+        
+        const [existingUser] = await db.query(
+          'SELECT id FROM users WHERE email = ?', 
+          [email]
+        );
+        
+        if (existingUser.length > 0) {
+          throw new Error('Email is already registered as a user');
+        }
 
         const defaultPassword = await bcrypt.hash('student123', 10);
         
+        // 1. Create a user record so the student can log in
+        const [userResult] = await db.query(
+          'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+          [name, email, defaultPassword, 'student']
+        );
+        const userId = userResult.insertId;
+
+        // 2. Create the student record linked to the user
         await db.query(`
           INSERT INTO students 
-          (name, register_no, department, year, phone, email, password, status) 
-          VALUES (?, ?, ?, ?, ?, ?, ?, 'active')
+          (user_id, name, register_no, department, year, phone, email) 
+          VALUES (?, ?, ?, ?, ?, ?, ?)
         `, [
-          name, register_no, department || 'CSE', year || 1, phone || '', email, defaultPassword
+          userId, name, register_no, department || 'CSE', year || 1, phone || '', email
         ]);
 
         successCount++;
