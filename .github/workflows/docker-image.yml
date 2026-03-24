@@ -1,18 +1,19 @@
-name: BIT HOSTEL
+name: Docker Build
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Backend
+        run: docker build -t backend ./backend
+
+      - name: Build Frontend
+        run: docker build -t frontend ./frontend
