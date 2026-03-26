@@ -1,6 +1,6 @@
 const fs = require('fs');
 const csv = require('csv-parser');
-const db = require('../config/database');
+const { pool } = require('../config/database');
 const bcrypt = require('bcryptjs');
 
 const parseCSV = (filePath) => {
@@ -41,7 +41,7 @@ exports.bulkStudents = async (req, res) => {
         }
 
         // Check duplicates
-        const [existing] = await db.query(
+        const [existing] = await pool.query(
           'SELECT id FROM students WHERE email = ? OR register_no = ?', 
           [email, register_no]
         );
@@ -50,7 +50,7 @@ exports.bulkStudents = async (req, res) => {
           throw new Error('Email or register number already exists');
         }
         
-        const [existingUser] = await db.query(
+        const [existingUser] = await pool.query(
           'SELECT id FROM users WHERE email = ?', 
           [email]
         );
@@ -62,14 +62,14 @@ exports.bulkStudents = async (req, res) => {
         const defaultPassword = await bcrypt.hash('student123', 10);
         
         // 1. Create a user record so the student can log in
-        const [userResult] = await db.query(
+        const [userResult] = await pool.query(
           'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
           [name, email, defaultPassword, 'student']
         );
         const userId = userResult.insertId;
 
         // 2. Create the student record linked to the user
-        await db.query(`
+        await pool.query(`
           INSERT INTO students 
           (user_id, name, register_no, department, year, phone, email) 
           VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -119,7 +119,7 @@ exports.bulkRooms = async (req, res) => {
             throw new Error('Capacity must be > 0');
           }
   
-          const [existing] = await db.query(
+          const [existing] = await pool.query(
             'SELECT id FROM rooms WHERE room_number = ? AND block = ?', 
             [roomNumber, block]
           );
@@ -128,7 +128,7 @@ exports.bulkRooms = async (req, res) => {
             throw new Error('Room already exists in this block');
           }
   
-          await db.query(`
+          await pool.query(`
             INSERT INTO rooms (room_number, block, capacity, type, status) 
             VALUES (?, ?, ?, ?, 'available')
           `, [roomNumber, block, capacity, type || 'Non-AC']);

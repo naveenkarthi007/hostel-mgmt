@@ -104,7 +104,7 @@ export default function RoomsPage() {
         <div className="flex flex-wrap gap-3">
           <Select value={block} onChange={e => setBlock(e.target.value)}>
             <option value="">All Blocks</option>
-            {['A', 'B', 'C', 'D'].map(b => <option key={b}>Block {b}</option>)}
+            {['A', 'B', 'C', 'D'].map(b => <option key={b} value={b}>Block {b}</option>)}
           </Select>
           <Select value={status} onChange={e => setStatus(e.target.value)}>
             <option value="">All Status</option>

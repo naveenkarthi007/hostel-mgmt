@@ -1,29 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Button, Badge, Input, Select, Textarea, Modal, PageHeader } from '../components/ui';
+import { Button, Badge, Input, Select, Textarea, Modal, PageHeader, Spinner } from '../components/ui';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
-
-const INITIAL = [];
+import { noticesAPI } from '../services/api';
 
 const CAT_BADGE = { urgent: 'danger', general: 'info', maintenance: 'warning', accounts: 'primary', events: 'success' };
 
 export default function NoticesPage() {
-  const [notices, setNotices] = useState(INITIAL);
+  const [notices, setNotices] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
   const [form, setForm] = useState({ title: '', content: '', category: 'general', target: 'all' });
+  const [saving, setSaving] = useState(false);
 
-  const handlePost = () => {
-    if (!form.title || !form.content) return toast.error('Title and content required.');
-    setNotices(n => [{ id: Date.now(), ...form, created_at: new Date().toISOString() }, ...n]);
-    toast.success('Notice published!');
-    setModal(false);
-    setForm({ title: '', content: '', category: 'general', target: 'all' });
+  const load = () => {
+    setLoading(true);
+    noticesAPI.getAll()
+      .then(r => setNotices(r.data.data || []))
+      .catch(() => toast.error('Failed to load notices.'))
+      .finally(() => setLoading(false));
   };
 
-  const handleDelete = id => {
-    setNotices(n => n.filter(x => x.id !== id));
-    toast.success('Notice removed.');
+  useEffect(() => {
+    load();
+  }, []);
+
+  const handlePost = async () => {
+    if (!form.title || !form.content) return toast.error('Title and content required.');
+    setSaving(true);
+    try {
+      await noticesAPI.create(form);
+      toast.success('Notice published!');
+      setModal(false);
+      setForm({ title: '', content: '', category: 'general', target: 'all' });
+      load();
+    } catch {
+      toast.error('Failed to post notice.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this notice?')) return;
+    try {
+      await noticesAPI.delete(id);
+      toast.success('Notice removed.');
+      load();
+    } catch {
+      toast.error('Failed to delete notice.');
+    }
   };
 
   return (
@@ -36,35 +63,40 @@ export default function NoticesPage() {
         meta={<Badge variant="default">{notices.length} published notices</Badge>}
       />
 
-      <div className="space-y-4">
-        {notices.map((notice, i) => (
-          <motion.div
-            key={notice.id}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.06 }}
-            className="rounded-3xl border border-brand-border bg-white p-6 shadow-card"
-          >
-            <div className="flex items-start gap-4">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-semibold flex-shrink-0
-                ${notice.category === 'urgent' ? 'bg-red-50 text-red-700' : notice.category === 'maintenance' ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'}`}>
-                {notice.category.slice(0, 3).toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <h3 className="font-semibold text-brand-text">{notice.title}</h3>
+      {loading ? (
+        <div className="flex justify-center py-16"><Spinner size="lg" className="text-brand-primary" /></div>
+      ) : (
+        <div className="space-y-4">
+          {notices.map((notice, i) => (
+            <motion.div
+              key={notice.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.06 }}
+              className="rounded-3xl border border-brand-border bg-white p-6 shadow-card"
+            >
+              <div className="flex items-start gap-4">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-semibold flex-shrink-0
+                  ${notice.category === 'urgent' ? 'bg-red-50 text-red-700' : notice.category === 'maintenance' ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'}`}>
+                  {notice.category.slice(0, 3).toUpperCase()}
                 </div>
-                
-                <div className="flex items-center gap-3 text-xs text-gray-400">
-                  <span>{format(new Date(notice.created_at), 'dd MMM yyyy, h:mm a')}</span>
-                  <span>Target: {notice.target === 'all' ? 'All Students' : notice.target}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <h3 className="font-semibold text-brand-text">{notice.title}</h3>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 text-xs text-gray-400">
+                    <span>{format(new Date(notice.created_at), 'dd MMM yyyy, h:mm a')}</span>
+                    <span>Target: {notice.target === 'all' ? 'All Students' : notice.target}</span>
+                    {notice.posted_by_name && <span>By: {notice.posted_by_name}</span>}
+                  </div>
                 </div>
+                <button onClick={() => handleDelete(notice.id)} className="text-gray-400 hover:text-brand-red transition-colors text-sm font-semibold">Remove</button>
               </div>
-              <button onClick={() => handleDelete(notice.id)} className="text-gray-400 hover:text-brand-red transition-colors text-sm font-semibold">Remove</button>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       <Modal open={modal} onClose={() => setModal(false)} title="Post New Notice">
         <div className="space-y-4">
@@ -88,7 +120,7 @@ export default function NoticesPage() {
           <Textarea label="Message" value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} placeholder="Notice content..." rows={4} />
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setModal(false)}>Cancel</Button>
-            <Button onClick={handlePost}>Publish</Button>
+            <Button onClick={handlePost} loading={saving}>Publish</Button>
           </div>
         </div>
       </Modal>

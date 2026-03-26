@@ -180,9 +180,8 @@ export default function StudentDashboard() {
               <div className="space-y-3">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   <div
-                    className="rounded-lg p-3"
+                    className="rounded-lg p-3 border"
                     style={{ backgroundColor: COLORS.primarybg, borderColor: '#D8DCF0' }}
-                    className="border"
                   >
                     <div className="text-xs uppercase tracking-wide font-bold mb-1" style={{ color: COLORS.secondarytext }}>
                       Room
@@ -192,9 +191,8 @@ export default function StudentDashboard() {
                     </div>
                   </div>
                   <div
-                    className="rounded-lg p-3"
-                    style={{ backgroundColor: COLORS.primarybg }}
-                    className="border"
+                    className="rounded-lg p-3 border"
+                    style={{ backgroundColor: COLORS.primarybg, borderColor: '#D8DCF0' }}
                   >
                     <div className="text-xs uppercase tracking-wide font-bold mb-1" style={{ color: COLORS.secondarytext }}>
                       Block
@@ -204,9 +202,8 @@ export default function StudentDashboard() {
                     </div>
                   </div>
                   <div
-                    className="rounded-lg p-3"
-                    style={{ backgroundColor: COLORS.primarybg }}
-                    className="border"
+                    className="rounded-lg p-3 border"
+                    style={{ backgroundColor: COLORS.primarybg, borderColor: '#D8DCF0' }}
                   >
                     <div className="text-xs uppercase tracking-wide font-bold mb-1" style={{ color: COLORS.secondarytext }}>
                       Floor

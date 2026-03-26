@@ -13,6 +13,8 @@ export default function LoginPage() {
 
   const handleRedirect = (role) => {
     if (role === 'admin') navigate('/');
+    else if (role === 'caretaker') navigate('/caretaker');
+    else if (role === 'warden') navigate('/warden');
     else navigate('/student');
   };
 
