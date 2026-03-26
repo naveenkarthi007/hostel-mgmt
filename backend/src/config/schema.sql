@@ -1,9 +1,13 @@
 -- ============================================================
 --  Bannari Amman Institute of Technology
 --  Hostel Management System – Complete Database Schema
+--  Compatible with MySQL 5.7+ / 8.0+
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS hostel_mgmt;
+CREATE DATABASE IF NOT EXISTS hostel_mgmt
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
 USE hostel_mgmt;
 
 -- ── USERS TABLE (Authentication for Admin, Caretaker, Warden, Student) ──
@@ -16,10 +20,10 @@ CREATE TABLE IF NOT EXISTS users (
   role        ENUM('admin','caretaker','warden','student') DEFAULT 'student',
   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_email (email),
-  INDEX idx_role (role),
-  INDEX idx_google_id (google_id)
-);
+  INDEX idx_users_email (email),
+  INDEX idx_users_role (role),
+  INDEX idx_users_google_id (google_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── ROOMS TABLE (Hostel Room Information) ──
 CREATE TABLE IF NOT EXISTS rooms (
@@ -33,10 +37,10 @@ CREATE TABLE IF NOT EXISTS rooms (
   status       ENUM('available','occupied','maintenance','reserved') DEFAULT 'available',
   created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_block (block),
-  INDEX idx_status (status),
-  INDEX idx_room_number (room_number)
-);
+  INDEX idx_rooms_block (block),
+  INDEX idx_rooms_status (status),
+  INDEX idx_rooms_room_number (room_number)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── STUDENTS TABLE (Student Records) ──
 CREATE TABLE IF NOT EXISTS students (
@@ -45,7 +49,7 @@ CREATE TABLE IF NOT EXISTS students (
   name         VARCHAR(120) NOT NULL,
   register_no  VARCHAR(30) NOT NULL UNIQUE,
   department   VARCHAR(60) NOT NULL,
-  year         TINYINT NOT NULL CHECK (year BETWEEN 1 AND 4),
+  year         TINYINT NOT NULL,
   phone        VARCHAR(15),
   email        VARCHAR(120),
   address      TEXT,
@@ -55,12 +59,13 @@ CREATE TABLE IF NOT EXISTS students (
   updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
   FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE SET NULL,
-  INDEX idx_register_no (register_no),
-  INDEX idx_email (email),
-  INDEX idx_room_id (room_id),
-  INDEX idx_user_id (user_id),
-  INDEX idx_department (department)
-);
+  CONSTRAINT chk_year CHECK (year BETWEEN 1 AND 4),
+  INDEX idx_students_register_no (register_no),
+  INDEX idx_students_email (email),
+  INDEX idx_students_room_id (room_id),
+  INDEX idx_students_user_id (user_id),
+  INDEX idx_students_department (department)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── ALLOCATIONS TABLE (Room Allocation History) ──
 CREATE TABLE IF NOT EXISTS allocations (
@@ -69,14 +74,14 @@ CREATE TABLE IF NOT EXISTS allocations (
   room_id      INT NOT NULL,
   allocated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   vacated_at   DATETIME DEFAULT NULL,
-  is_active    BOOLEAN DEFAULT TRUE,
+  is_active    TINYINT(1) DEFAULT 1,
   FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
   FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
-  INDEX idx_student_id (student_id),
-  INDEX idx_room_id (room_id),
-  INDEX idx_is_active (is_active),
-  INDEX idx_allocated_at (allocated_at)
-);
+  INDEX idx_alloc_student_id (student_id),
+  INDEX idx_alloc_room_id (room_id),
+  INDEX idx_alloc_is_active (is_active),
+  INDEX idx_alloc_allocated_at (allocated_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── COMPLAINTS TABLE (Student Complaints & Maintenance Requests) ──
 CREATE TABLE IF NOT EXISTS complaints (
@@ -93,13 +98,13 @@ CREATE TABLE IF NOT EXISTS complaints (
   updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE SET NULL,
   FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL,
-  INDEX idx_student_id (student_id),
-  INDEX idx_status (status),
-  INDEX idx_category (category),
-  INDEX idx_priority (priority),
-  INDEX idx_assigned_to (assigned_to),
-  INDEX idx_created_at (created_at)
-);
+  INDEX idx_comp_student_id (student_id),
+  INDEX idx_comp_status (status),
+  INDEX idx_comp_category (category),
+  INDEX idx_comp_priority (priority),
+  INDEX idx_comp_assigned_to (assigned_to),
+  INDEX idx_comp_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── NOTICES TABLE (Announcements & Hostel Notices) ──
 CREATE TABLE IF NOT EXISTS notices (
@@ -112,10 +117,10 @@ CREATE TABLE IF NOT EXISTS notices (
   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (posted_by) REFERENCES users(id) ON DELETE SET NULL,
-  INDEX idx_category (category),
-  INDEX idx_target (target),
-  INDEX idx_created_at (created_at)
-);
+  INDEX idx_notices_category (category),
+  INDEX idx_notices_target (target),
+  INDEX idx_notices_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── VISITORS TABLE (Guest Management) ──
 CREATE TABLE IF NOT EXISTS visitors (
@@ -129,10 +134,10 @@ CREATE TABLE IF NOT EXISTS visitors (
   out_time     DATETIME DEFAULT NULL,
   status       ENUM('inside','exited') DEFAULT 'inside',
   FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE SET NULL,
-  INDEX idx_student_id (student_id),
-  INDEX idx_status (status),
-  INDEX idx_in_time (in_time)
-);
+  INDEX idx_visitors_student_id (student_id),
+  INDEX idx_visitors_status (status),
+  INDEX idx_visitors_in_time (in_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
 -- SEED DATA
@@ -242,14 +247,15 @@ INSERT IGNORE INTO visitors
 ('Sister Priya', 'Sister', '9345678901', 3, 'inside');
 
 -- ============================================================
--- CREATE INDEXES FOR PERFORMANCE
+-- ADDITIONAL PERFORMANCE INDEXES
+-- (Using CREATE INDEX IF NOT EXISTS syntax for MySQL 8.0.29+)
+-- For older MySQL versions, these will error if indexes already exist
 -- ============================================================
 
--- Additional indexes for common queries
-ALTER TABLE students ADD INDEX idx_created_at (created_at);
-ALTER TABLE complaints ADD INDEX idx_updated_at (updated_at);
-ALTER TABLE rooms ADD INDEX idx_block_status (block, status);
-ALTER TABLE allocations ADD INDEX idx_student_room (student_id, room_id);
+CREATE INDEX idx_students_created_at ON students(created_at);
+CREATE INDEX idx_comp_updated_at ON complaints(updated_at);
+CREATE INDEX idx_rooms_block_status ON rooms(block, status);
+CREATE INDEX idx_alloc_student_room ON allocations(student_id, room_id);
 
 -- ============================================================
 -- END OF SCHEMA
