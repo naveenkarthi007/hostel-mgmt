@@ -14,16 +14,21 @@ import RoomsPage from './pages/RoomsPage';
 import AllocationsPage from './pages/AllocationsPage';
 import ComplaintsPage from './pages/ComplaintsPage';
 import NoticesPage from './pages/NoticesPage';
+import WardenLeaveApprovals from './pages/warden/WardenLeaveApprovals';
 import StudentDashboard from './pages/student/StudentDashboard';
 import StudentProfile from './pages/student/StudentProfile';
+import StudentLeaveRequest from './pages/student/StudentLeaveRequest';
 import StudentComplaints from './pages/student/StudentComplaints';
 import StudentNotices from './pages/student/StudentNotices';
+import MessMenuPage from './pages/MessMenuPage';
 import CaretakerDashboard from './pages/caretaker/CaretakerDashboard';
 import CaretakerComplaints from './pages/caretaker/CaretakerComplaints';
 import WardenDashboard from './pages/warden/WardenDashboard';
 import WardenStudents from './pages/warden/WardenStudents';
 import WardenComplaints from './pages/warden/WardenComplaints';
 import { Spinner } from './components/ui';
+
+import VisitorManagementPage from './pages/VisitorManagementPage';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -76,6 +81,9 @@ function AppRoutes() {
                 <Route path="/students"    element={<StudentsPage />} />
                 <Route path="/rooms"       element={<RoomsPage />} />
                 <Route path="/allocations" element={<AllocationsPage />} />
+                <Route path="/outpasses"   element={<WardenLeaveApprovals />} />
+                <Route path="/mess-menu"   element={<MessMenuPage />} />
+                <Route path="/visitors"    element={<VisitorManagementPage />} />
                 <Route path="/complaints"  element={<ComplaintsPage />} />
                 <Route path="/notices"     element={<NoticesPage />} />
                 <Route path="*"            element={<Navigate to="/" replace />} />
@@ -108,6 +116,9 @@ function AppRoutes() {
               <Routes>
                 <Route path="/"           element={<WardenDashboard />} />
                 <Route path="/students"   element={<WardenStudents />} />
+                <Route path="/outpasses"  element={<WardenLeaveApprovals />} />
+                <Route path="/mess-menu"  element={<MessMenuPage />} />
+                <Route path="/visitors"   element={<VisitorManagementPage />} />
                 <Route path="/complaints" element={<WardenComplaints />} />
                 <Route path="*"           element={<Navigate to="/warden" replace />} />
               </Routes>
@@ -124,6 +135,8 @@ function AppRoutes() {
               <Routes>
                 <Route path="/"           element={<StudentDashboard />} />
                 <Route path="/profile"    element={<StudentProfile />} />
+                <Route path="/outpass"    element={<StudentLeaveRequest />} />
+                <Route path="/mess-menu"  element={<MessMenuPage />} />
                 <Route path="/complaints" element={<StudentComplaints />} />
                 <Route path="/notices"    element={<StudentNotices />} />
                 <Route path="*"           element={<Navigate to="/student" replace />} />

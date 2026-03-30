@@ -638,6 +638,26 @@ export default function StudentsPage() {
         </div>
       </div>
 
+      <BulkUploadModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        title="Import Students"
+        columns={[
+          { key: 'name', label: 'Name' },
+          { key: 'register_no', label: 'Register No' },
+          { key: 'department', label: 'Department' },
+          { key: 'year', label: 'Year' },
+          { key: 'phone', label: 'Phone' },
+          { key: 'email', label: 'Email' },
+          { key: 'address', label: 'Address' }
+        ]}
+        sampleData={[
+          { name: 'John Doe', register_no: '22CS001', department: 'CSE', year: '1', phone: '1234567890', email: 'john@example.com', address: '123 Main St' }
+        ]}
+        uploadEndpoint="/bulk/students"
+        onSuccess={() => { setIsBulkModalOpen(false); loadStudents(); }}
+      />
+
       <Modal
         open={modal === 'add' || modal === 'edit'}
         onClose={resetModalState}
@@ -848,28 +868,7 @@ export default function StudentsPage() {
         )}
       </Modal>
 
-      {isBulkModalOpen && (
-        <BulkUploadModal
-          isOpen={isBulkModalOpen}
-          onClose={() => setIsBulkModalOpen(false)}
-          uploadEndpoint="/bulk/students"
-          title="Import Students via CSV"
-          sampleData={[
-            { register_no: 'B2023001', name: 'John Doe', email: 'john@example.com', phone: '9876543210' },
-            { register_no: 'B2023002', name: 'Jane Smith', email: 'jane@example.com', phone: '9876543211' },
-            { register_no: 'B2023003', name: 'Alex Johnson', email: 'alex@example.com', phone: '9876543212' }
-          ]}
-          columns={[
-            { key: 'register_no', label: 'Roll Number' },
-            { key: 'name', label: 'Full Name' },
-            { key: 'email', label: 'Email Address' },
-            { key: 'phone', label: 'Phone Number' }
-          ]}
-          onSuccess={() => {
-            loadStudents();
-          }}
-        />
-      )}
+
     </div>
   );
 }

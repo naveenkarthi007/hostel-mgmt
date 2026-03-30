@@ -13,6 +13,9 @@ const studentPortal  = require('../controllers/studentPortalController');
 const bulkCtrl       = require('../controllers/bulkController');
 const caretakerCtrl  = require('../controllers/caretakerController');
 const wardenCtrl     = require('../controllers/wardenController');
+const visitorCtrl    = require('../controllers/visitorController');
+const leaveCtrl      = require('../controllers/leaveController');
+const messCtrl       = require('../controllers/messMenuController');
 const multer         = require('multer');
 
 const upload = multer({ dest: 'uploads/' });
@@ -49,6 +52,22 @@ router.get   ('/rooms/:id',  authenticate, adminOnly, roomCtrl.getOne);
 router.post  ('/rooms',      authenticate, adminOnly, roomCtrl.create);
 router.put   ('/rooms/:id',  authenticate, adminOnly, roomCtrl.update);
 router.delete('/rooms/:id',  authenticate, adminOnly, roomCtrl.remove);
+
+// ── Visitors (Admin / Warden) ────────────────────────────
+router.get   ('/visitors',            authenticate, wardenOrAdmin, visitorCtrl.getAll);
+router.post  ('/visitors',            authenticate, wardenOrAdmin, visitorCtrl.create);
+router.put   ('/visitors/:id/exit',   authenticate, wardenOrAdmin, visitorCtrl.markExit);
+router.delete('/visitors/:id',        authenticate, adminOnly, visitorCtrl.remove);
+
+// ── Leaves / Outpasses (Admin / Warden / Student) ────────
+router.get   ('/leaves',              authenticate, leaveCtrl.getAll);
+router.post  ('/leaves',              authenticate, leaveCtrl.create);
+router.put   ('/leaves/:id/status',   authenticate, wardenOrAdmin, leaveCtrl.updateStatus);
+router.delete('/leaves/:id',          authenticate, leaveCtrl.remove);
+
+// ── Mess Menu (Admin / Student / Warden) ─────────────────
+router.get   ('/mess-menu',           authenticate, messCtrl.getAll);
+router.put   ('/mess-menu',           authenticate, wardenOrAdmin, messCtrl.update);
 
 // ── Allocations (Admin) ──────────────────────────────────
 router.post('/allocations/allocate', authenticate, adminOnly, allocCtrl.allocate);

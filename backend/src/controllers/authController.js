@@ -29,11 +29,25 @@ const login = async (req, res) => {
 
     const token = signToken(user);
 
+    const userData = { id: user.id, name: user.name, email: user.email, role: user.role };
+
+    // Attach student_id for student-role users
+    if (user.role === 'student') {
+      let [studentRows] = await pool.query('SELECT id FROM students WHERE user_id = ?', [user.id]);
+      if (!studentRows.length) {
+        [studentRows] = await pool.query('SELECT id FROM students WHERE email = ?', [user.email]);
+        if (studentRows.length) {
+          await pool.query('UPDATE students SET user_id = ? WHERE id = ?', [user.id, studentRows[0].id]);
+        }
+      }
+      if (studentRows.length) userData.student_id = studentRows[0].id;
+    }
+
     res.json({
       success: true,
       message: 'Login successful.',
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      user: userData,
     });
   } catch (err) {
     console.error(err);
@@ -75,11 +89,36 @@ const googleLogin = async (req, res) => {
     const user = rows[0];
     const token = signToken(user);
 
+    const userData = { id: user.id, name: user.name, email: user.email, role: user.role };
+
+    // Attach student_id for student-role users
+    if (user.role === 'student') {
+      let [studentRows] = await pool.query('SELECT id FROM students WHERE user_id = ?', [user.id]);
+      if (!studentRows.length) {
+        // Try matching by email and auto-link
+        [studentRows] = await pool.query('SELECT id FROM students WHERE email = ?', [user.email]);
+        if (studentRows.length) {
+          await pool.query('UPDATE students SET user_id = ? WHERE id = ?', [user.id, studentRows[0].id]);
+          userData.student_id = studentRows[0].id;
+        } else {
+          // Auto-create pending student record
+          const tempRegNo = `G-${user.id}-${Date.now().toString().slice(-4)}`;
+          const [insertRes] = await pool.query(
+            'INSERT INTO students (user_id, name, email, register_no, department, year) VALUES (?, ?, ?, ?, ?, ?)',
+            [user.id, user.name, user.email, tempRegNo, 'PENDING', 1]
+          );
+          userData.student_id = insertRes.insertId;
+        }
+      } else {
+        userData.student_id = studentRows[0].id;
+      }
+    }
+
     res.json({
       success: true,
       message: 'Google login successful.',
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      user: userData,
     });
   } catch (err) {
     console.error('Google auth error:', err);
@@ -91,7 +130,32 @@ const me = async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT id,name,email,role,created_at FROM users WHERE id=?', [req.user.id]);
     if (!rows.length) return res.status(404).json({ success: false, message: 'User not found.' });
-    res.json({ success: true, user: rows[0] });
+
+    const userData = rows[0];
+
+    // For student-role users, also fetch the linked student record id
+    if (userData.role === 'student') {
+      let [studentRows] = await pool.query('SELECT id FROM students WHERE user_id = ?', [userData.id]);
+      if (!studentRows.length) {
+        [studentRows] = await pool.query('SELECT id FROM students WHERE email = ?', [userData.email]);
+        if (studentRows.length) {
+          await pool.query('UPDATE students SET user_id = ? WHERE id = ?', [userData.id, studentRows[0].id]);
+          userData.student_id = studentRows[0].id;
+        } else {
+          // Auto-create pending student record
+          const tempRegNo = `G-${userData.id}-${Date.now().toString().slice(-4)}`;
+          const [insertRes] = await pool.query(
+            'INSERT INTO students (user_id, name, email, register_no, department, year) VALUES (?, ?, ?, ?, ?, ?)',
+            [userData.id, userData.name, userData.email, tempRegNo, 'PENDING', 1]
+          );
+          userData.student_id = insertRes.insertId;
+        }
+      } else {
+        userData.student_id = studentRows[0].id;
+      }
+    }
+
+    res.json({ success: true, user: userData });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.' });
   }

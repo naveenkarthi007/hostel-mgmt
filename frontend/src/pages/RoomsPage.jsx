@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { roomsAPI } from '../services/api';
 import { Button, Badge, Input, Select, Modal, Spinner, PageHeader, SectionCard } from '../components/ui';
+import BulkUploadModal from '../components/ui/BulkUploadModal';
+import { Upload } from 'lucide-react';
 
 const STATUS_BADGE = { available: 'success', occupied: 'danger', maintenance: 'warning', reserved: 'info' };
 const STATUS_COLOR = {
@@ -23,6 +25,7 @@ export default function RoomsPage() {
   const [form, setForm] = useState({ room_number: '', block: 'A', floor: 1, capacity: 3, room_type: 'triple' });
   const [saving, setSaving] = useState(false);
   const [view, setView] = useState('grid');
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -93,6 +96,9 @@ export default function RoomsPage() {
           <>
             <Button variant="outline" size="sm" onClick={() => setView(v => v === 'grid' ? 'table' : 'grid')}>
               {view === 'grid' ? 'Table View' : 'Grid View'}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setIsBulkModalOpen(true)} className="flex items-center gap-2">
+              <Upload className="w-4 h-4" /> Import Rooms
             </Button>
             <Button size="sm" onClick={openAdd}>Add Room</Button>
           </>
@@ -194,6 +200,24 @@ export default function RoomsPage() {
           </div>
         </SectionCard>
       )}
+
+      <BulkUploadModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        title="Import Rooms"
+        columns={[
+          { key: 'room_number', label: 'Room Number' },
+          { key: 'block', label: 'Block' },
+          { key: 'floor', label: 'Floor' },
+          { key: 'capacity', label: 'Capacity' },
+          { key: 'room_type', label: 'Room Type' }
+        ]}
+        sampleData={[
+          { room_number: 'A-101', block: 'A', floor: '1', capacity: '3', room_type: 'triple' }
+        ]}
+        uploadEndpoint="/bulk/rooms"
+        onSuccess={() => { setIsBulkModalOpen(false); load(); }}
+      />
 
       <Modal open={modal === 'add' || modal === 'edit'} onClose={() => setModal(null)} title={modal === 'add' ? 'Add New Room' : 'Edit Room'}>
         <div className="grid grid-cols-2 gap-4">

@@ -139,6 +139,34 @@ CREATE TABLE IF NOT EXISTS visitors (
   INDEX idx_visitors_in_time (in_time)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ── LEAVES TABLE (Outpass / Leave Requests) ──
+CREATE TABLE IF NOT EXISTS leaves (
+  id           INT AUTO_INCREMENT PRIMARY KEY,
+  student_id   INT NOT NULL,
+  from_date    DATE NOT NULL,
+  to_date      DATE NOT NULL,
+  reason       TEXT NOT NULL,
+  status       ENUM('pending','approved','rejected') DEFAULT 'pending',
+  approved_by  INT DEFAULT NULL,
+  created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+  FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_leaves_student_id (student_id),
+  INDEX idx_leaves_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ── MESS MENU TABLE ──
+CREATE TABLE IF NOT EXISTS mess_menu (
+  id           INT AUTO_INCREMENT PRIMARY KEY,
+  day_of_week  ENUM('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday') NOT NULL,
+  meal_type    ENUM('Breakfast','Lunch','Snacks','Dinner') NOT NULL,
+  items        TEXT NOT NULL,
+  created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_meal (day_of_week, meal_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================================
 -- SEED DATA
 -- ============================================================
@@ -149,9 +177,9 @@ INSERT IGNORE INTO users (name, email, password, role)
 VALUES ('Chief Warden', 'admin@baithotel.edu', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
 
 -- Default Warden User (Password: Warden@123)
--- Hash: $2a$10$JBz1E7BpA8vkNnKcQ0W1cuU9PzT9E8p5RvJ0R0Y0G5bKVjA3jK
+-- Hash: $2a$10$g71PM9i4HOCI2ibO7/daOO4IinWOMCF/zuVJ/nGL/h.iPyG70he5C
 INSERT IGNORE INTO users (name, email, password, role)
-VALUES ('Head Warden', 'warden@baithotel.edu', '$2a$10$JBz1E7BpA8vkNnKcQ0W1cuU9PzT9E8p5RvJ0R0Y0G5bKVjA3jK', 'warden');
+VALUES ('Head Warden', 'warden@baithotel.edu', '$2a$10$g71PM9i4HOCI2ibO7/daOO4IinWOMCF/zuVJ/nGL/h.iPyG70he5C', 'warden');
 
 -- Sample Rooms (Block A)
 INSERT IGNORE INTO rooms (room_number, block, floor, capacity, occupied, room_type, status) VALUES

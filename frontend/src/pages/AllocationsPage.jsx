@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { allocationsAPI, studentsAPI, roomsAPI } from '../services/api';
 import { Button, Badge, Select, Modal, Table, PageHeader, SectionCard } from '../components/ui';
+import BulkUploadModal from '../components/ui/BulkUploadModal';
+import { Upload } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function AllocationsPage() {
@@ -13,6 +15,7 @@ export default function AllocationsPage() {
   const [form, setForm] = useState({ student_id: '', room_id: '' });
   const [vacateId, setVacateId] = useState('');
   const [saving, setSaving] = useState(false);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -100,6 +103,9 @@ export default function AllocationsPage() {
         description="Administer student-to-room assignments, track active occupancy, and review historical room movement across hostel blocks."
         actions={
           <>
+            <Button variant="outline" size="sm" onClick={() => setIsBulkModalOpen(true)} className="flex items-center gap-2">
+              <Upload className="w-4 h-4" /> Import
+            </Button>
             <Button variant="outline" size="sm" onClick={openVacate}>Vacate Room</Button>
             <Button size="sm" onClick={openAllocate}>Allocate Room</Button>
           </>
@@ -109,6 +115,21 @@ export default function AllocationsPage() {
       <SectionCard title="Allocation History" description="Complete assignment trail for room movements, activations, and vacated records.">
         <Table columns={columns} data={history} loading={loading} />
       </SectionCard>
+
+      <BulkUploadModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        title="Import Allocations"
+        columns={[
+          { key: 'register_no', label: 'Student Register No' },
+          { key: 'room_number', label: 'Room Number' }
+        ]}
+        sampleData={[
+          { register_no: '22CS001', room_number: 'A-101' }
+        ]}
+        uploadEndpoint="/bulk/allocations"
+        onSuccess={() => { setIsBulkModalOpen(false); load(); }}
+      />
 
       <Modal open={modal === 'allocate'} onClose={() => setModal(null)} title="Allocate Room">
         <div className="space-y-4">

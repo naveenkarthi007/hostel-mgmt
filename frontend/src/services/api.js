@@ -49,6 +49,7 @@ export const studentsAPI = {
   update:    (id,d) => api.put(`/students/${id}`, d),
   delete:    (id) => api.delete(`/students/${id}`),
   exportCSV: ()   => api.get('/students/export', { responseType: 'blob' }),
+  importCSV: (f)  => api.post('/bulk/students', f),
 };
 
 export const roomsAPI = {
@@ -57,12 +58,15 @@ export const roomsAPI = {
   create:  (d)    => api.post('/rooms', d),
   update:  (id,d) => api.put(`/rooms/${id}`, d),
   delete:  (id)   => api.delete(`/rooms/${id}`),
+  exportCSV: ()   => api.get('/rooms/export', { responseType: 'blob' }),
+  importCSV: (f)  => api.post('/bulk/rooms', f),
 };
 
 export const allocationsAPI = {
   allocate: (d) => api.post('/allocations/allocate', d),
   vacate:   (d) => api.post('/allocations/vacate', d),
   history:  ()  => api.get('/allocations/history'),
+  importCSV: (f) => api.post('/bulk/allocations', f),
 };
 
 export const complaintsAPI = {
@@ -76,6 +80,25 @@ export const noticesAPI = {
   getAll:  (p)  => api.get('/notices', { params: p }),
   create:  (d)  => api.post('/notices', d),
   delete:  (id) => api.delete(`/notices/${id}`),
+};
+
+export const visitorsAPI = {
+  getAll:   (p)    => api.get('/visitors', { params: p }),
+  create:   (d)    => api.post('/visitors', d),
+  markExit: (id)   => api.put(`/visitors/${id}/exit`),
+  delete:   (id)   => api.delete(`/visitors/${id}`),
+};
+
+export const leavesAPI = {
+  getAll:       (p)      => api.get('/leaves', { params: p }),
+  create:       (d)      => api.post('/leaves', d),
+  updateStatus: (id, d)  => api.put(`/leaves/${id}/status`, d),
+  delete:       (id)     => api.delete(`/leaves/${id}`),
+};
+
+export const messMenuAPI = {
+  getAll: ()  => api.get('/mess-menu'),
+  update: (d) => api.put('/mess-menu', d),
 };
 
 export const studentPortalAPI = {

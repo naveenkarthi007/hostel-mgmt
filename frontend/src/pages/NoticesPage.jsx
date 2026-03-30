@@ -78,12 +78,13 @@ export default function NoticesPage() {
               <div className="flex items-start gap-4">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-semibold flex-shrink-0
                   ${notice.category === 'urgent' ? 'bg-red-50 text-red-700' : notice.category === 'maintenance' ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'}`}>
-                  {notice.category.slice(0, 3).toUpperCase()}
+                  {(notice.category || 'general').slice(0, 3).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <h3 className="font-semibold text-brand-text">{notice.title}</h3>
                   </div>
+                  <p className="mt-2 mb-3 text-sm text-gray-600 whitespace-pre-wrap">{notice.content}</p>
                   
                   <div className="flex items-center gap-3 text-xs text-gray-400">
                     <span>{format(new Date(notice.created_at), 'dd MMM yyyy, h:mm a')}</span>

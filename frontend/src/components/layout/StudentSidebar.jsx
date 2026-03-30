@@ -6,6 +6,8 @@ import { useAuth } from '../../context/AuthContext';
 const NAV = [
   { to: '/student', label: 'Dashboard', icon: LayoutGrid },
   { to: '/student/profile', label: 'Profile', icon: UserRound },
+  { to: '/student/outpass', label: 'Outpass', icon: ClipboardList },
+  { to: '/student/mess-menu', label: 'Mess Menu', icon: LayoutGrid },
   { to: '/student/complaints', label: 'Complaints', icon: ClipboardList },
   { to: '/student/notices', label: 'Notices', icon: Bell },
 ];
@@ -19,7 +21,7 @@ function NavItem({ to, label, icon: Icon, onClick, end = false }) {
       className={({ isActive }) =>
         `flex items-center justify-between px-6 py-2.5 text-[13px] font-medium transition-all duration-200 ${
           isActive
-            ? 'bg-[#7D53F6]/10 text-[#7D53F6] border-l-4 border-[#7D53F6]'
+            ? 'bg-brand-primary/10 text-brand-primary border-l-4 border-brand-primary'
             : 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent'
         }`
       }
@@ -48,11 +50,11 @@ export default function StudentSidebar({ children }) {
   const pageTitle = activeItem?.label || 'Student Portal';
 
   return (
-    <div className="min-h-screen bg-[#F5F6F8] font-sans">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[250px] flex-col bg-white shadow-[2px_0_15px_rgba(0,0,0,0.03)] lg:flex">
+    <div className="min-h-screen bg-brand-surface font-sans">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[250px] flex-col bg-white border-r border-gray-200 shadow-sm lg:flex">
         <div className="flex h-[80px] items-center px-6 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <div className="h-10 w-10 bg-[#7D53F6] rounded-lg flex items-center justify-center text-white font-bold text-xs">BIT</div>
+            <div className="h-10 w-10 bg-brand-primary rounded-lg flex items-center justify-center text-white font-bold text-xs">BIT</div>
             <div className="leading-tight">
               <div className="text-[14px] font-bold text-gray-900">Bannari Amman</div>
               <div className="text-[12px] font-semibold text-gray-600">Inst. of Tech</div>
@@ -70,7 +72,7 @@ export default function StudentSidebar({ children }) {
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-gray-600 hover:bg-[#7D53F6]/10 hover:text-[#7D53F6] transition-colors rounded-lg"
+            className="flex w-full items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-gray-600 hover:bg-brand-primary/10 hover:text-brand-primary transition-colors rounded-lg"
           >
             <LogOut className="h-4 w-4" />
             <span>Logout</span>
@@ -79,7 +81,7 @@ export default function StudentSidebar({ children }) {
       </aside>
 
       <div className="lg:pl-[250px] flex flex-col min-h-screen">
-        <header className="sticky top-0 z-30 flex h-[80px] items-center justify-between bg-[#F5F6F8] px-6 lg:px-8 pt-4 pb-2">
+        <header className="sticky top-0 z-30 flex h-[80px] items-center justify-between bg-brand-surface px-6 lg:px-8 pt-4 pb-2">
           <div className="flex w-full items-center justify-between rounded-xl bg-white px-6 py-4 shadow-sm">
             <div className="flex items-center gap-3">
               <button

@@ -1,26 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { dashboardAPI } from '../services/api';
-import { Spinner } from '../components/ui';
+import { Spinner, StatCard, PageHeader, Card } from '../components/ui';
 import { Building2, Home, Users, CheckCircle, Clock } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
-const PIE_COLORS = ['#fb7185', '#a78bfa', '#818cf8', '#38bdf8'];
-
-function StatCard({ title, count, icon: Icon }) {
-  const bgClass = 'bg-[#7D53F6]/10 text-[#7D53F6]';
-  return (
-    <div className={"bg-white rounded-2xl shadow-sm p-4 flex items-center gap-4 transition-all hover:shadow-md border border-gray-50/50"}>
-      <div className={"h-12 w-12 rounded-xl flex items-center justify-center flex-shrink-0 " + bgClass}>
-        <Icon className="h-6 w-6" strokeWidth={1.5} />
-      </div>
-      <div>
-        <div className="text-[13px] font-bold text-gray-800 leading-tight">{title}</div>
-        <div className="text-xs text-gray-500 mt-1">{count || 0} Total</div>
-      </div>
-    </div>
-  );
-}
+const PIE_COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#0EA5E9', '#8B5CF6'];
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -37,7 +22,6 @@ export default function DashboardPage() {
   const stats = data?.stats || {};
   const blockStats = data?.blockStats || [];
 
-  // Generate pie data from the backend's blockStats
   const pieData = blockStats.length > 0 
     ? blockStats.map((b) => ({
         name: `Block ${b.block}`,
@@ -47,68 +31,72 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Spinner size="lg" className="text-[#7D53F6]" />
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Spinner size="lg" className="text-brand-primary" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Welcome Banner */}
-      <div className="bg-white rounded-2xl px-8 py-6 shadow-sm border border-gray-50 flex items-center justify-between relative overflow-hidden">
-        <div className="relative z-10 max-w-xl">
-          <h1 className="text-[22px] font-bold text-[#7D53F6] mb-2">
-            Welcome {user?.name || 'Administrator'}! 👋
-          </h1>
-          <p className="text-[13px] text-gray-500 leading-relaxed">
-            You can manage all things in the Administrator Portal like Campus overview, Hostel occupancy, Student stats and Complaints.
-          </p>
-        </div>
-        {/* User context information removed as requested */}
-      </div>
+      <PageHeader 
+        title={`Welcome back, ${user?.name || 'Administrator'} 👋`}
+        description="Here's what's happening in your campus today. Manage hostel occupancy, view student statistics, and handle pending complaints."
+        eyebrow="Admin Dashboard"
+      />
 
-      {/* Grid: Stats and Pie Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Side: 6 Stat Cards using Backend Data */}
-        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <StatCard title="Total Students" count={stats.totalStudents} icon={Users} />
-          <StatCard title="Total Rooms" count={stats.totalRooms} icon={Building2} />
-          <StatCard title="Available Rooms" count={stats.availableRooms} icon={Home} />
-          <StatCard title="Occupied Rooms" count={stats.occupiedRooms} icon={Home} />
-          <StatCard title="Pending Complaints" count={stats.pendingComplaints} icon={Clock} />
-          <StatCard title="Resolved Complaints" count={stats.resolvedComplaints} icon={CheckCircle} />
+        <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <StatCard title="Total Students" value={stats.totalStudents || 0} icon={<Users className="w-5 h-5" />} color="primary" />
+          <StatCard title="Total Rooms" value={stats.totalRooms || 0} icon={<Building2 className="w-5 h-5" />} color="blue" />
+          <StatCard title="Available Rooms" value={stats.availableRooms || 0} icon={<Home className="w-5 h-5" />} color="green" />
+          <StatCard title="Occupied Rooms" value={stats.occupiedRooms || 0} icon={<Home className="w-5 h-5" />} color="purple" />
+          <StatCard title="Pending Complaints" value={stats.pendingComplaints || 0} icon={<Clock className="w-5 h-5" />} color="amber" />
+          <StatCard title="Resolved Complaints" value={stats.resolvedComplaints || 0} icon={<CheckCircle className="w-5 h-5" />} color="green" />
         </div>
 
-        {/* Right Side: Pie Chart Card using Backend Data */}
-        <div className="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-gray-50 p-6 flex flex-col">
-          <h2 className="text-[14px] font-bold text-gray-800 mb-6">Occupancy by Block</h2>
-          <div className="flex justify-center gap-4 text-[10px] text-gray-500 mb-2 font-medium flex-wrap">
-            {pieData.map((d, idx) => (
-              <div key={idx} className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }}></div>
-                {d.name}
+        <div className="lg:col-span-4">
+          <Card className="p-6 h-full flex flex-col">
+            <h2 className="text-lg font-bold text-gray-900 mb-6">Occupancy by Block</h2>
+            <div className="flex-1 min-h-[240px] relative">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', fontSize: '13px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }} 
+                    itemStyle={{ color: '#0F172A', fontWeight: 600 }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none flex-col">
+                <span className="text-3xl font-bold text-gray-900">{stats.occupiedRooms || 0}</span>
+                <span className="text-xs text-gray-500 font-medium">Occupied</span>
               </div>
-            ))}
-          </div>
-          <div className="flex-1 min-h-[220px] relative mt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  innerRadius={0}
-                  outerRadius={95}
-                  dataKey="value"
-                  stroke="none"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={"cell-" + index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ borderRadius: '12px', fontSize: '12px', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+            </div>
+            
+            <div className="mt-6 space-y-3">
+              {pieData.map((d, idx) => (
+                <div key={idx} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }}></div>
+                    <span className="text-gray-600 font-medium">{d.name}</span>
+                  </div>
+                  <span className="font-bold text-gray-900">{d.value}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
         </div>
       </div>
     </div>

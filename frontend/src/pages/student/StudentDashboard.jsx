@@ -3,39 +3,9 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { studentPortalAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import { Card, Badge, Spinner, EmptyState, Button } from '../../components/ui';
+import { Card, Badge, Spinner, Button, PageHeader, StatCard } from '../../components/ui';
 import { format } from 'date-fns';
-import { AlertCircle, CheckCircle2, Clock } from 'lucide-react';
-
-const COLORS = {
-  primarybg: '#EEF1F9',
-  secondarybg: '#FFFFFF',
-  primary: '#7D53F6',
-  primarydull: '#9F74F7',
-  green: '#008000',
-  pending: '#F0B041',
-  red: '#DC2626',
-  primarytext: '#000000',
-  secondarytext: '#5F6388',
-  skyblue: '#0388FC',
-};
-
-const getStatusIcon = (status) => {
-  switch(status) {
-    case 'resolved': return <CheckCircle2 className="w-4 h-4" />;
-    case 'in_progress': return <Clock className="w-4 h-4" />;
-    default: return <AlertCircle className="w-4 h-4" />;
-  }
-};
-
-const getStatusColor = (status) => {
-  switch(status) {
-    case 'resolved': return 'bg-green-50 text-green-700';
-    case 'in_progress': return 'bg-blue-50 text-blue-700';
-    case 'pending': return 'bg-amber-50 text-amber-700';
-    default: return 'bg-gray-50 text-gray-700';
-  }
-};
+import { AlertCircle, CheckCircle2, Clock, MapPin } from 'lucide-react';
 
 export default function StudentDashboard() {
   const { user } = useAuth();
@@ -50,7 +20,7 @@ export default function StudentDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <Spinner size="lg" className="text-brand-primary" />
       </div>
     );
@@ -59,328 +29,139 @@ export default function StudentDashboard() {
   const { student, roommates, complaintStats, recentNotices } = data;
 
   return (
-    <div
-      className="min-h-screen p-3 md:p-4"
-      style={{
-        background: `linear-gradient(180deg, ${COLORS.primarybg} 0%, #F7F8FC 100%)`,
-        color: COLORS.primarytext,
-      }}
-    >
-      <div className="max-w-6xl mx-auto space-y-3">
-        {/* Hero Banner */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="rounded-[20px] p-4 md:p-5 border shadow-sm overflow-hidden relative"
-          style={{
-            backgroundColor: COLORS.secondarybg,
-            borderColor: '#D8DCF0',
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-50 to-blue-50 opacity-50" />
-          <div className="relative z-10">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div>
-                <p
-                  className="text-xs font-semibold uppercase tracking-[1px]"
-                  style={{ color: COLORS.skyblue }}
-                >
-                  Student Portal
-                </p>
-                <h1
-                  className="text-2xl md:text-2xl font-bold mt-1"
-                  style={{ color: COLORS.primary }}
-                >
-                  Welcome back, {user?.name || 'Resident'}.
-                </h1>
-                <p className="text-xs mt-1" style={{ color: COLORS.secondarytext }}>
-                  Your hostel dashboard with room details, complaints, and latest notices at a glance.
-                </p>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <Link to="/student/complaints">
-                    <Button className="px-3 py-1 text-xs" style={{ backgroundColor: COLORS.primary, color: COLORS.secondarybg }}>
-                      File Complaint
-                    </Button>
-                  </Link>
-                  <Link to="/student/profile">
-                    <Button variant="outline" className="px-3 py-1 text-xs" style={{ borderColor: '#D8DCF0' }}>
-                      View Profile
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-              <div className="rounded-xl p-3 border" style={{ backgroundColor: COLORS.primarybg, borderColor: '#D8DCF0' }}>
-                <div className="text-xs uppercase tracking-wide font-bold mb-1" style={{ color: COLORS.secondarytext }}>
-                  Room Status
-                </div>
-                <div className="text-2xl font-bold mb-1" style={{ color: COLORS.primary }}>
-                  {student?.room_number || 'Pending'}
-                </div>
-                {student?.room_number && (
-                  <div className="text-xs" style={{ color: COLORS.secondarytext }}>
-                    Block {student.block} • Floor {student.floor}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { label: 'Total', value: complaintStats?.total || 0, color: COLORS.primary },
-            { label: 'Pending', value: complaintStats?.pending || 0, color: COLORS.pending },
-            { label: 'In Progress', value: complaintStats?.in_progress || 0, color: COLORS.skyblue },
-            { label: 'Resolved', value: complaintStats?.resolved || 0, color: COLORS.green },
-          ].map(({ label, value, color }) => (
-            <motion.div
-              key={label}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-              className="rounded-lg p-3 border shadow-sm"
-              style={{
-                backgroundColor: COLORS.secondarybg,
-                borderColor: '#D8DCF0',
-              }}
-            >
-              <div className="text-xs uppercase tracking-wide font-bold mb-1" style={{ color: COLORS.secondarytext }}>
-                {label}
-              </div>
-              <div className="text-xl font-bold" style={{ color }}>
-                {value}
-              </div>
-            </motion.div>
-          ))}
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <PageHeader 
+          title={`Welcome back, ${user?.name || 'Resident'}`}
+          description="Your hostel dashboard with room details, complaints, and latest notices at a glance."
+          eyebrow="Student Portal"
+        />
+        <div className="flex items-center gap-3 shrink-0 mb-8 md:mb-0">
+          <Link to="/student/complaints">
+            <Button>File Complaint</Button>
+          </Link>
+          <Link to="/student/profile">
+            <Button variant="outline">View Profile</Button>
+          </Link>
         </div>
+      </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Room Information */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.4 }}
-            className="lg:col-span-2 rounded-[20px] p-4 md:p-5 border shadow-sm"
-            style={{
-              backgroundColor: COLORS.secondarybg,
-              borderColor: '#D8DCF0',
-            }}
-          >
-            <h2 className="text-lg font-bold mb-1" style={{ color: COLORS.primary }}>
-              Room Information
-            </h2>
-            <p className="text-xs mb-3" style={{ color: COLORS.secondarytext }}>
-              Current room assignment and roommates
-            </p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard title="Total Complaints" value={complaintStats?.total || 0} color="primary" />
+        <StatCard title="Pending" value={complaintStats?.pending || 0} color="amber" />
+        <StatCard title="In Progress" value={complaintStats?.in_progress || 0} color="blue" />
+        <StatCard title="Resolved" value={complaintStats?.resolved || 0} color="green" />
+      </div>
 
-            {student?.room_number ? (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  <div
-                    className="rounded-lg p-3 border"
-                    style={{ backgroundColor: COLORS.primarybg, borderColor: '#D8DCF0' }}
-                  >
-                    <div className="text-xs uppercase tracking-wide font-bold mb-1" style={{ color: COLORS.secondarytext }}>
-                      Room
-                    </div>
-                    <div className="text-xl font-bold" style={{ color: COLORS.primary }}>
-                      {student.room_number}
-                    </div>
-                  </div>
-                  <div
-                    className="rounded-lg p-3 border"
-                    style={{ backgroundColor: COLORS.primarybg, borderColor: '#D8DCF0' }}
-                  >
-                    <div className="text-xs uppercase tracking-wide font-bold mb-1" style={{ color: COLORS.secondarytext }}>
-                      Block
-                    </div>
-                    <div className="text-xl font-bold" style={{ color: COLORS.primary }}>
-                      {student.block}
-                    </div>
-                  </div>
-                  <div
-                    className="rounded-lg p-3 border"
-                    style={{ backgroundColor: COLORS.primarybg, borderColor: '#D8DCF0' }}
-                  >
-                    <div className="text-xs uppercase tracking-wide font-bold mb-1" style={{ color: COLORS.secondarytext }}>
-                      Floor
-                    </div>
-                    <div className="text-xl font-bold" style={{ color: COLORS.primary }}>
-                      {student.floor}
-                    </div>
-                  </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2 p-6 h-full border-t-4 border-t-brand-primary">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Room Information</h2>
+              <p className="text-sm text-gray-500">Current room assignment and roommates</p>
+            </div>
+            {student?.room_number && (
+              <Badge variant="success" className="px-3 py-1">Assigned</Badge>
+            )}
+          </div>
+
+          {student?.room_number ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-slate-50 rounded-xl p-4 border border-gray-100 flex flex-col items-center justify-center text-center">
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Room</div>
+                  <div className="text-2xl font-black text-brand-primary">{student.room_number}</div>
                 </div>
+                <div className="bg-slate-50 rounded-xl p-4 border border-gray-100 flex flex-col items-center justify-center text-center">
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Block</div>
+                  <div className="text-2xl font-black text-gray-800">{student.block}</div>
+                </div>
+                <div className="bg-slate-50 rounded-xl p-4 border border-gray-100 flex flex-col items-center justify-center text-center">
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Floor</div>
+                  <div className="text-2xl font-black text-gray-800">{student.floor}</div>
+                </div>
+              </div>
 
-                {roommates.length > 0 && (
-                  <div className="border-t pt-3" style={{ borderColor: '#D8DCF0' }}>
-                    <h3 className="font-semibold text-sm mb-2" style={{ color: COLORS.primary }}>
-                      {roommates.length} {roommates.length === 1 ? 'Roommate' : 'Roommates'}
-                    </h3>
-                    <div className="space-y-2">
-                      {roommates.map((roommate, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center gap-2 p-2 rounded-lg"
-                          style={{ backgroundColor: COLORS.primarybg }}
-                        >
-                          <div
-                            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-                            style={{ backgroundColor: COLORS.primary }}
-                          >
-                            {roommate.name[0]}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-xs">{roommate.name}</div>
-                            <div className="text-xs" style={{ color: COLORS.secondarytext }}>
-                              {roommate.department} • Year {roommate.year}
-                            </div>
+              {roommates.length > 0 && (
+                <div className="pt-4 border-t border-gray-100">
+                  <h3 className="font-semibold text-gray-900 mb-3">
+                    {roommates.length} {roommates.length === 1 ? 'Roommate' : 'Roommates'}
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {roommates.map((roommate, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-100 shadow-sm">
+                        <div className="w-10 h-10 rounded-full bg-indigo-50 text-brand-primary flex items-center justify-center font-bold">
+                          {roommate.name[0]}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-gray-900 truncate">{roommate.name}</div>
+                          <div className="text-xs text-gray-500">
+                            {roommate.department} • Year {roommate.year}
                           </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="py-4 text-center">
-                <AlertCircle className="w-8 h-8 mx-auto mb-1 text-amber-400" />
-                <p className="font-semibold text-sm mb-1">No Room Allocated</p>
-                <p className="text-xs" style={{ color: COLORS.secondarytext }}>
-                  Contact hostel admin for room assignment.
-                </p>
-              </div>
-            )}
-          </motion.div>
-
-          {/* Recent Complaints */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
-            className="rounded-[20px] p-4 md:p-5 border shadow-sm"
-            style={{
-              backgroundColor: COLORS.secondarybg,
-              borderColor: '#D8DCF0',
-            }}
-          >
-            <h2 className="text-lg font-bold mb-1" style={{ color: COLORS.primary }}>
-              Activity Summary
-            </h2>
-            <p className="text-xs mb-3" style={{ color: COLORS.secondarytext }}>
-              Complaint status breakdown
-            </p>
-
-            <div className="space-y-2">
-              {complaintStats?.total === 0 ? (
-                <div className="py-4 text-center">
-                  <CheckCircle2 className="w-8 h-8 mx-auto mb-1 text-green-400" />
-                  <p className="text-xs font-semibold">All Set!</p>
-                  <p className="text-xs" style={{ color: COLORS.secondarytext }}>
-                    No pending complaints
-                  </p>
                 </div>
-              ) : (
-                [
-                  { label: 'Pending', value: complaintStats?.pending, color: COLORS.pending },
-                  { label: 'In Progress', value: complaintStats?.in_progress, color: COLORS.skyblue },
-                  { label: 'Resolved', value: complaintStats?.resolved, color: COLORS.green },
-                ].map(({ label, value, color }) => (
-                  <div key={label}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-semibold">{label}</span>
-                      <span className="text-xs font-bold" style={{ color }}>{value || 0}</span>
-                    </div>
-                    <div className="h-1.5 rounded-full" style={{ backgroundColor: '#E5E7EB' }}>
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{
-                          width: `${complaintStats?.total ? (value / complaintStats.total) * 100 : 0}%`,
-                          backgroundColor: color,
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))
               )}
             </div>
-
-            <Link to="/student/complaints" className="w-full mt-3">
-              <Button className="w-full text-xs" style={{ backgroundColor: COLORS.primary, color: COLORS.secondarybg }}>
-                View All Complaints
-              </Button>
-            </Link>
-          </motion.div>
-        </div>
-
-        {/* Recent Notices */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.4 }}
-          className="rounded-[20px] p-4 md:p-5 border shadow-sm"
-          style={{
-            backgroundColor: COLORS.secondarybg,
-            borderColor: '#D8DCF0',
-          }}
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h2 className="text-lg font-bold" style={{ color: COLORS.primary }}>
-                Recent Notices
-              </h2>
-              <p className="text-xs" style={{ color: COLORS.secondarytext }}>
-                Latest updates from hostel administration
-              </p>
+          ) : (
+            <div className="py-12 flex flex-col items-center text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
+              <AlertCircle className="w-10 h-10 text-amber-500 mb-3" />
+              <h3 className="text-base font-bold text-gray-900 border-none">No Room Allocated</h3>
+              <p className="text-sm text-gray-500 mt-1">Please contact the hostel administration for your room assignment.</p>
             </div>
-            <Link to="/student/notices" className="text-xs font-semibold" style={{ color: COLORS.primary }}>
-              View All →
+          )}
+        </Card>
+
+        <Card className="p-6 h-full flex flex-col">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Recent Notices</h2>
+              <p className="text-sm text-gray-500">Latest updates</p>
+            </div>
+            <Link to="/student/notices" className="text-sm font-semibold text-brand-primary hover:text-brand-primary-light">
+              View All &rarr;
             </Link>
           </div>
 
-          {recentNotices.length > 0 ? (
-            <div className="space-y-2">
-              {recentNotices.map((notice, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="p-3 rounded-lg border hover:shadow-sm transition-all"
-                  style={{ backgroundColor: COLORS.primarybg, borderColor: '#D8DCF0' }}
-                >
-                  <div className="flex items-start gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-xs text-black truncate">{notice.title}</h3>
-                        {notice.category === 'urgent' && (
-                          <Badge style={{ backgroundColor: COLORS.red, color: 'white' }}>
-                            {notice.category}
-                          </Badge>
-                        )}
-                      </div>
-                      {notice.content && (
-                        <p className="text-xs line-clamp-2" style={{ color: COLORS.secondarytext }}>
-                          {notice.content}
-                        </p>
+          <div className="flex-1 overflow-y-auto">
+            {recentNotices.length > 0 ? (
+              <div className="space-y-4">
+                {recentNotices.map((notice, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="group border-b border-gray-100 last:border-0 pb-4 last:pb-0"
+                  >
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <h3 className="font-semibold text-sm text-gray-900 group-hover:text-brand-primary transition-colors">{notice.title}</h3>
+                      {notice.category === 'urgent' && (
+                        <Badge variant="danger">Urgent</Badge>
                       )}
-                      <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>
-                        {format(new Date(notice.created_at), 'dd MMM yyyy')}
-                      </p>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div className="py-4 text-center">
-              <CheckCircle2 className="w-8 h-8 mx-auto mb-1" style={{ color: COLORS.primary }} />
-              <p className="text-xs font-semibold">No notices yet</p>
-            </div>
-          )}
-        </motion.div>
+                    {notice.content && (
+                      <p className="text-sm text-gray-500 line-clamp-2 mb-2">
+                        {notice.content}
+                      </p>
+                    )}
+                    <span className="text-xs font-medium text-gray-400">
+                      {format(new Date(notice.created_at), 'dd MMM yyyy')}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 flex flex-col items-center text-center">
+                <CheckCircle2 className="w-8 h-8 text-emerald-500 mb-2" />
+                <p className="text-sm font-medium text-gray-900">You're all caught up!</p>
+                <p className="text-xs text-gray-500">No new notices at this time.</p>
+              </div>
+            )}
+          </div>
+        </Card>
       </div>
     </div>
   );

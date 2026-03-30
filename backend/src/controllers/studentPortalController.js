@@ -1,16 +1,26 @@
 const { pool } = require('../config/database');
 
-// Get the student record linked to the logged-in user's email
+// Get the student record linked to the logged-in user (by user_id or email)
 const findStudentByUser = async (userId) => {
+  // First try to find student linked by user_id
+  const [byUserId] = await pool.query(
+    `SELECT s.*, r.room_number, r.block, r.floor, r.room_type
+     FROM students s LEFT JOIN rooms r ON s.room_id=r.id
+     WHERE s.user_id=?`,
+    [userId]
+  );
+  if (byUserId.length) return byUserId[0];
+
+  // Fall back to matching by email
   const [users] = await pool.query('SELECT email FROM users WHERE id=?', [userId]);
   if (!users.length) return null;
-  const [students] = await pool.query(
+  const [byEmail] = await pool.query(
     `SELECT s.*, r.room_number, r.block, r.floor, r.room_type
      FROM students s LEFT JOIN rooms r ON s.room_id=r.id
      WHERE s.email=?`,
     [users[0].email]
   );
-  return students.length ? students[0] : null;
+  return byEmail.length ? byEmail[0] : null;
 };
 
 const getMyProfile = async (req, res) => {

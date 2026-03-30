@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { wardenAPI } from '../../services/api';
-import { Spinner, Badge } from '../../components/ui';
-import { Users, Home, AlertCircle, FileText } from 'lucide-react';
+import { Spinner, Badge, StatCard, PageHeader, Card, Table } from '../../components/ui';
+import { Users, Home, AlertCircle, Building2, UserPlus, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
-const PIE_COLORS = ['#fb7185', '#a78bfa', '#818cf8', '#38bdf8'];
+const PIE_COLORS = ['#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#14b8a6', '#f59e0b'];
 
 export default function WardenDashboard() {
   const [data, setData] = useState(null);
@@ -20,8 +20,8 @@ export default function WardenDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <Spinner size="lg" className="text-blue-500" />
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Spinner size="lg" className="text-brand-primary" />
       </div>
     );
   }
@@ -34,68 +34,37 @@ export default function WardenDashboard() {
     ? blockStats.map((b) => ({ name: `Block ${b.block}`, value: Number(b.occupied) || 0 }))
     : [{ name: 'No Data', value: 1 }];
 
-  return (
-    <div className="space-y-6">
-      {/* Welcome Banner */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="rounded-2xl p-6 md:p-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 shadow-sm"
-      >
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-600">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Warden Dashboard</h1>
-            <p className="text-sm text-gray-600 mt-1">Student oversight, room management, and hostel statistics</p>
-          </div>
-        </div>
-      </motion.div>
+  const totalCapacity = blockStats.reduce((sum, b) => sum + (Number(b.capacity) || 0), 0);
+  const totalOccupied = blockStats.reduce((sum, b) => sum + (Number(b.occupied) || 0), 0);
+  const availableSlots = Math.max(0, totalCapacity - totalOccupied);
 
-      {/* Stats Grid */}
+  return (
+    <div className="max-w-7xl mx-auto space-y-6">
+      <PageHeader 
+        title="Warden Dashboard"
+        description="Student oversight, room management, and hostel statistics overview."
+        eyebrow="Management Portal"
+      />
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Students', value: stats.totalStudents || 0, icon: Users, color: 'bg-blue-50' },
-          { label: 'Total Rooms', value: stats.totalRooms || 0, icon: Home, color: 'bg-green-50' },
-          { label: 'Available', value: stats.availableRooms || 0, icon: '📌', color: 'bg-amber-50' },
-          { label: 'Occupied', value: stats.occupiedRooms || 0, icon: '✓', color: 'bg-purple-50' },
-        ].map(({ label, value, icon: Icon, color }) => (
-          <motion.div
-            key={label}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className={`${color} rounded-2xl p-4 border border-gray-100 shadow-sm`}
-          >
-            <div className="text-2xl mb-2">
-              {typeof Icon === 'string' ? Icon : <Icon className="w-6 h-6" />}
-            </div>
-            <div className="text-2xl font-bold text-gray-900">{value}</div>
-            <div className="text-xs text-gray-600 mt-1">{label}</div>
-          </motion.div>
-        ))}
+        <StatCard title="Total Students" value={stats.totalStudents || 0} icon={<Users className="w-5 h-5" />} color="primary" />
+        <StatCard title="Total Rooms" value={stats.totalRooms || 0} icon={<Building2 className="w-5 h-5" />} color="blue" />
+        <StatCard title="Available Slots" value={stats.availableRooms || 0} icon={<Home className="w-5 h-5" />} color="amber" />
+        <StatCard title="Occupied Rooms" value={stats.occupiedRooms || 0} icon={<CheckCircle2 className="w-5 h-5" />} color="green" />
       </div>
 
-      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Occupancy Chart */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.4 }}
-          className="lg:col-span-1 rounded-2xl p-6 bg-white border border-gray-100 shadow-sm"
-        >
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Occupancy by Block</h2>
+        <Card className="p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-6">Occupancy by Block</h2>
           {pieData.length > 0 && pieData[0].value > 0 ? (
-            <div className="h-60">
+            <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={pieData}
-                    innerRadius={0}
-                    outerRadius={80}
+                    innerRadius={50}
+                    outerRadius={90}
+                    paddingAngle={3}
                     dataKey="value"
                     stroke="none"
                   >
@@ -103,87 +72,128 @@ export default function WardenDashboard() {
                       <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ borderRadius: '12px', fontSize: '12px', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      borderRadius: '12px', 
+                      fontSize: '12px', 
+                      border: '1px solid #e5e7eb', 
+                      backgroundColor: '#ffffff',
+                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' 
+                    }} 
+                    itemStyle={{ color: '#111827', fontWeight: 600 }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
+              <div className="flex flex-wrap justify-center gap-4 mt-2">
+                {pieData.map((entry, index) => (
+                  <div key={index} className="flex items-center gap-2 text-xs font-medium text-gray-600">
+                    <span 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }} 
+                    />
+                    {entry.name} ({entry.value})
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
-            <div className="h-60 flex items-center justify-center text-gray-500">
-              No occupancy data
+            <div className="h-64 flex flex-col items-center justify-center text-center bg-slate-50 rounded-xl border border-dashed border-gray-200">
+              <AlertCircle className="w-8 h-8 text-gray-400 mb-2" />
+              <p className="text-sm font-medium text-gray-500">No occupancy data available</p>
             </div>
           )}
-        </motion.div>
+        </Card>
 
-        {/* Quick Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.4 }}
-          className="lg:col-span-1 rounded-2xl p-6 bg-white border border-gray-100 shadow-sm"
-        >
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Room Statistics</h2>
+        <Card className="p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-6">Room Statistics</h2>
           <div className="space-y-4">
-            {[
-              { label: 'Total Capacity', value: blockStats.reduce((sum, b) => sum + (Number(b.capacity) || 0), 0) },
-              { label: 'Currently Occupied', value: blockStats.reduce((sum, b) => sum + (Number(b.occupied) || 0), 0) },
-              { label: 'Available Slots', value: Math.max(0, (blockStats.reduce((sum, b) => sum + (Number(b.capacity) || 0), 0) - blockStats.reduce((sum, b) => sum + (Number(b.occupied) || 0), 0))) },
-            ].map(({ label, value }) => (
-              <div key={label} className="pb-3 border-b border-gray-100 last:border-0">
-                <div className="text-sm text-gray-600 mb-1">{label}</div>
-                <div className="text-2xl font-bold text-blue-600">{value}</div>
+            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <div className="text-sm font-semibold text-gray-900">Total Capacity</div>
               </div>
-            ))}
+              <div className="text-xl font-bold text-indigo-600">{totalCapacity}</div>
+            </div>
+            
+            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div className="text-sm font-semibold text-gray-900">Currently Occupied</div>
+              </div>
+              <div className="text-xl font-bold text-emerald-600">{totalOccupied}</div>
+            </div>
+
+            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+                  <Home className="w-5 h-5" />
+                </div>
+                <div className="text-sm font-semibold text-gray-900">Available Slots</div>
+              </div>
+              <div className="text-xl font-bold text-amber-600">{availableSlots}</div>
+            </div>
           </div>
-        </motion.div>
+        </Card>
       </div>
 
-      {/* Recent Students */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25, duration: 0.4 }}
-        className="rounded-2xl p-6 bg-white border border-gray-100 shadow-sm"
-      >
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Recent Registered Students</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[600px]">
-            <thead className="bg-gray-50 border-b border-gray-100">
+      <Card className="p-6 overflow-hidden">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Recent Registrations</h2>
+            <p className="text-sm text-gray-500">Latest students added to the system</p>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center">
+            <UserPlus className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="-mx-6 -mb-6">
+          <Table>
+            <thead>
               <tr>
-                {['Name', 'Register No', 'Department', 'Year', 'Date'].map(header => (
-                  <th key={header} className="px-4 py-3 text-left text-xs font-bold uppercase text-gray-600">
-                    {header}
-                  </th>
-                ))}
+                <th>Student</th>
+                <th>Register No</th>
+                <th>Department</th>
+                <th>Year</th>
+                <th>Date Added</th>
               </tr>
             </thead>
             <tbody>
               {recentStudents.length > 0 ? (
                 recentStudents.map((student, i) => (
-                  <motion.tr
-                    key={student.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="border-b border-gray-100 hover:bg-gray-50"
-                  >
-                    <td className="px-4 py-3 font-medium text-gray-900">{student.name}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{student.register_no}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{student.department}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">Year {student.year}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{format(new Date(student.created_at), 'dd MMM yyyy')}</td>
-                  </motion.tr>
+                  <tr key={student.id}>
+                    <td>
+                      <div className="font-semibold text-gray-900">{student.name}</div>
+                    </td>
+                    <td><Badge variant="outline" className="font-mono text-xs">{student.register_no}</Badge></td>
+                    <td><div className="text-gray-600">{student.department}</div></td>
+                    <td>
+                      <span className="inline-flex items-center px-2 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-semibold">
+                        Year {student.year}
+                      </span>
+                    </td>
+                    <td><div className="text-gray-500">{format(new Date(student.created_at), 'dd MMM yyyy')}</div></td>
+                  </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-4 py-8 text-center text-gray-500">
-                    No recent students
+                  <td colSpan="5">
+                    <div className="py-8 flex flex-col items-center text-center">
+                      <Users className="w-10 h-10 text-gray-300 mb-2" />
+                      <p className="text-sm font-medium text-gray-900">No recent students</p>
+                      <p className="text-xs text-gray-500">No new registrations in the system yet.</p>
+                    </div>
                   </td>
                 </tr>
               )}
             </tbody>
-          </table>
+          </Table>
         </div>
-      </motion.div>
+      </Card>
     </div>
   );
 }
