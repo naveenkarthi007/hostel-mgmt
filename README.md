@@ -74,6 +74,21 @@ hostel-mgmt/
 
 ## 🚀 Setup Instructions
 
+### Option A (Recommended): Run with Docker Compose
+
+Prereqs: Docker Desktop (includes Docker Compose)
+
+```bash
+cd hostel-mgmt
+docker compose up --build
+```
+
+Then open:
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:5000`
+
+The MySQL container is initialized automatically from `backend/src/config/schema.sql`.
+
 ### Prerequisites
 - Node.js v18+
 - MySQL 8+

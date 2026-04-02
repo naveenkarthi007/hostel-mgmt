@@ -16,9 +16,16 @@ const STATUS_COLOR = {
 
 export default function RoomsPage() {
   const [rooms, setRooms] = useState([]);
+  const [wardens, setWardens] = useState([]);
+  const [floorWardens, setFloorWardens] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [assignmentLoading, setAssignmentLoading] = useState(true);
+  const [assignmentSaving, setAssignmentSaving] = useState(false);
   const [block, setBlock] = useState('');
   const [status, setStatus] = useState('');
+  const [assignmentBlock, setAssignmentBlock] = useState('A');
+  const [assignmentFloor, setAssignmentFloor] = useState(1);
+  const [wingAssignments, setWingAssignments] = useState({ left: '', right: '' });
   const [modal, setModal] = useState(null);
   const [selected, setSelected] = useState(null);
   const [detail, setDetail] = useState(null);
@@ -32,9 +39,33 @@ export default function RoomsPage() {
     roomsAPI.getAll({ block, status }).then(r => setRooms(r.data.data)).finally(() => setLoading(false));
   };
 
+  const loadAssignments = () => {
+    setAssignmentLoading(true);
+    Promise.all([
+      roomsAPI.getWardens(),
+      roomsAPI.getFloorWardens({ block: assignmentBlock, floor: assignmentFloor }),
+    ])
+      .then(([wardenResponse, assignmentResponse]) => {
+        const wardenList = wardenResponse.data.data || [];
+        const assignmentList = assignmentResponse.data.data || [];
+        setWardens(wardenList);
+        setFloorWardens(assignmentList);
+        setWingAssignments({
+          left: assignmentList.find(item => item.wing === 'left')?.warden_id || '',
+          right: assignmentList.find(item => item.wing === 'right')?.warden_id || '',
+        });
+      })
+      .catch(() => toast.error('Failed to load floor wardens.'))
+      .finally(() => setAssignmentLoading(false));
+  };
+
   useEffect(() => {
     load();
   }, [block, status]);
+
+  useEffect(() => {
+    loadAssignments();
+  }, [assignmentBlock, assignmentFloor]);
 
   const openAdd = () => {
     setForm({ room_number: '', block: 'A', floor: 1, capacity: 3, room_type: 'triple' });
@@ -84,6 +115,30 @@ export default function RoomsPage() {
     }
   };
 
+  const saveFloorWardens = async () => {
+    if (wingAssignments.left && wingAssignments.right && Number(wingAssignments.left) === Number(wingAssignments.right)) {
+      toast.error('Left wing and right wing must have different wardens.');
+      return;
+    }
+    setAssignmentSaving(true);
+    try {
+      await roomsAPI.setFloorWardens({
+        block: assignmentBlock,
+        floor: assignmentFloor,
+        assignments: {
+          left: wingAssignments.left || null,
+          right: wingAssignments.right || null,
+        },
+      });
+      toast.success('Floor warden assignment updated.');
+      loadAssignments();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update floor wardens.');
+    } finally {
+      setAssignmentSaving(false);
+    }
+  };
+
   const occupancyPct = room => room.capacity > 0 ? Math.round((room.occupied / room.capacity) * 100) : 0;
 
   return (
@@ -128,6 +183,68 @@ export default function RoomsPage() {
               </span>
             ))}
           </div>
+        </div>
+      </SectionCard>
+
+      <SectionCard
+        title="Floor Warden Assignment"
+        description="Assign separate wardens for the left wing and right wing of a specific block and floor."
+        action={<Button size="sm" onClick={saveFloorWardens} loading={assignmentSaving}>Save Floor Wardens</Button>}
+      >
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-3">
+            <Select value={assignmentBlock} onChange={e => setAssignmentBlock(e.target.value)}>
+              {['A', 'B', 'C', 'D'].map(b => <option key={b} value={b}>Block {b}</option>)}
+            </Select>
+            <Select value={assignmentFloor} onChange={e => setAssignmentFloor(Number(e.target.value))}>
+              {[1, 2, 3, 4, 5].map(f => <option key={f} value={f}>Floor {f}</option>)}
+            </Select>
+          </div>
+
+          {assignmentLoading ? (
+            <div className="flex justify-center py-8"><Spinner /></div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Select
+                  label="Left Wing Warden"
+                  value={wingAssignments.left}
+                  onChange={e => setWingAssignments(current => ({ ...current, left: e.target.value }))}
+                >
+                  <option value="">Select warden</option>
+                  {wardens.map(warden => (
+                    <option key={warden.id} value={warden.id}>{warden.name} ({warden.email})</option>
+                  ))}
+                </Select>
+
+                <Select
+                  label="Right Wing Warden"
+                  value={wingAssignments.right}
+                  onChange={e => setWingAssignments(current => ({ ...current, right: e.target.value }))}
+                >
+                  <option value="">Select warden</option>
+                  {wardens.map(warden => (
+                    <option key={warden.id} value={warden.id}>{warden.name} ({warden.email})</option>
+                  ))}
+                </Select>
+              </div>
+
+              <div className="rounded-2xl border border-brand-border/70 bg-brand-surface/40 p-4">
+                <div className="text-xs font-bold uppercase tracking-[0.12em] text-brand-muted mb-2">Assigned Wardens</div>
+                {floorWardens.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {floorWardens.map(item => (
+                      <Badge key={`${item.wing}-${item.warden_id}`} variant="primary">
+                        {item.wing === 'left' ? 'Left Wing' : 'Right Wing'}: {item.warden_name}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-brand-muted">No wardens assigned to this floor.</p>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </SectionCard>
 

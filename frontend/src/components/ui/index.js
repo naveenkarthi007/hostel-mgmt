@@ -33,6 +33,7 @@ export function Badge({ children, variant = 'default', className = '' }) {
     primary:  'bg-indigo-50 text-indigo-700 border-indigo-200',
     purple:   'bg-purple-50 text-purple-700 border-purple-200',
     pending:  'bg-orange-50 text-orange-700 border-orange-200',
+    outline:  'bg-white text-gray-700 border-gray-200',
   };
   return (
     <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${variants[variant] || variants.default} ${className}`}>
@@ -198,7 +199,7 @@ export function Table({ columns, data, loading, onRow }) {
       <table className="w-full text-sm text-left">
         <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs font-semibold uppercase tracking-wider">
           <tr>
-            {columns.map(c => (
+            {columns?.map(c => (
               <th key={c.key} className="px-6 py-3 whitespace-nowrap">
                 {c.label}
               </th>
@@ -206,7 +207,7 @@ export function Table({ columns, data, loading, onRow }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100 bg-white">
-          {data.map((row, i) => (
+          {data?.map((row, i) => (
             <motion.tr
               key={row.id || i}
               initial={{ opacity: 0 }}
@@ -215,7 +216,7 @@ export function Table({ columns, data, loading, onRow }) {
               onClick={() => onRow && onRow(row)}
               className={`${onRow ? 'cursor-pointer hover:bg-gray-50' : ''} transition-colors group`}
             >
-              {columns.map(c => (
+              {columns?.map(c => (
                 <td key={c.key} className="px-6 py-4 text-gray-700 whitespace-nowrap">
                   {c.render ? c.render(row[c.key], row) : row[c.key] ?? '-'}
                 </td>
@@ -224,7 +225,7 @@ export function Table({ columns, data, loading, onRow }) {
           ))}
         </tbody>
       </table>
-      {data.length === 0 && <EmptyState title="No records found" description="We couldn't find any data matching your criteria." />}
+      {(!data || data.length === 0) && <EmptyState title="No records found" description="We couldn't find any data matching your criteria." />}
     </div>
   );
 }
@@ -257,5 +258,106 @@ export function SectionCard({ title, description, action, children, className = 
       )}
       <div className="p-6">{children}</div>
     </Card>
+  );
+}
+
+export function PortalHero({
+  eyebrow,
+  title,
+  description,
+  actions,
+  meta,
+  icon,
+  accent = 'primary',
+  className = '',
+}) {
+  const accents = {
+    primary: {
+      glow: 'bg-brand-primary/12',
+      soft: 'bg-[#f4f1ff]',
+      text: 'text-brand-primary',
+      ring: 'border-[#ece8ff]',
+      icon: 'bg-brand-primary/12 text-brand-primary',
+    },
+    orange: {
+      glow: 'bg-orange-500/10',
+      soft: 'bg-orange-50',
+      text: 'text-orange-600',
+      ring: 'border-orange-100',
+      icon: 'bg-orange-100 text-orange-600',
+    },
+    blue: {
+      glow: 'bg-sky-500/10',
+      soft: 'bg-sky-50',
+      text: 'text-sky-600',
+      ring: 'border-sky-100',
+      icon: 'bg-sky-100 text-sky-600',
+    },
+  };
+
+  const palette = accents[accent] || accents.primary;
+
+  return (
+    <section className={`relative overflow-hidden rounded-[24px] border border-white/80 bg-white/80 px-4 py-4 shadow-[0_18px_40px_rgba(145,158,171,0.12)] backdrop-blur-xl md:px-5 md:py-5 ${className}`}>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(125,83,246,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(3,136,252,0.08),transparent_24%)]" />
+      <div className={`absolute -right-8 -top-8 h-28 w-28 rounded-full blur-3xl ${palette.glow}`} />
+      <div className="relative flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div className="max-w-2xl">
+          {eyebrow && (
+            <div className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] ${palette.soft} ${palette.text} ${palette.ring}`}>
+              {icon ? <span className={`flex h-5 w-5 items-center justify-center rounded-full ${palette.icon}`}>{icon}</span> : null}
+              <span>{eyebrow}</span>
+            </div>
+          )}
+          <h1 className="mt-3 font-display text-[2rem] font-black tracking-[-0.04em] text-brand-text md:text-[2.25rem] md:leading-[1.05]">{title}</h1>
+          {description && (
+            <p className="mt-2.5 max-w-2xl text-sm leading-6 text-brand-muted md:text-[0.95rem]">{description}</p>
+          )}
+          {meta && <div className="mt-4">{meta}</div>}
+        </div>
+        {actions && <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">{actions}</div>}
+      </div>
+    </section>
+  );
+}
+
+export function MetricPanel({ title, value, helper, icon, tone = 'primary', className = '' }) {
+  const tones = {
+    primary: 'bg-brand-primary/10 text-brand-primary',
+    orange: 'bg-orange-100 text-orange-600',
+    blue: 'bg-sky-100 text-sky-600',
+    green: 'bg-emerald-100 text-emerald-600',
+    red: 'bg-red-100 text-red-600',
+    purple: 'bg-purple-100 text-purple-600',
+  };
+
+  return (
+    <Card className={`rounded-[20px] border-white/80 bg-white/85 p-4 backdrop-blur-xl ${className}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-[9px] font-semibold uppercase tracking-[0.16em] text-brand-muted">{title}</div>
+          <div className="mt-2 font-display text-[2rem] font-black tracking-[-0.04em] text-brand-text">{value}</div>
+          {helper && <div className="mt-1 text-xs text-brand-muted">{helper}</div>}
+        </div>
+        {icon ? <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${tones[tone] || tones.primary}`}>{icon}</div> : null}
+      </div>
+    </Card>
+  );
+}
+
+export function PanelShell({ title, description, action, children, className = '' }) {
+  return (
+    <section className={`overflow-hidden rounded-[24px] border border-white/80 bg-white/86 shadow-[0_18px_42px_rgba(145,158,171,0.11)] backdrop-blur-xl ${className}`}>
+      {(title || description || action) && (
+        <div className="flex flex-col gap-3 border-b border-brand-border/70 bg-[linear-gradient(180deg,rgba(247,248,253,0.95)_0%,rgba(247,248,253,0.76)_100%)] px-4 py-4 md:flex-row md:items-center md:justify-between md:px-5">
+          <div>
+            {title && <h2 className="font-display text-[1.15rem] font-bold tracking-[-0.03em] text-brand-text md:text-[1.35rem]">{title}</h2>}
+            {description && <p className="mt-1.5 max-w-2xl text-xs leading-6 text-brand-muted md:text-sm">{description}</p>}
+          </div>
+          {action && <div className="shrink-0">{action}</div>}
+        </div>
+      )}
+      <div className="px-4 py-4 md:px-5">{children}</div>
+    </section>
   );
 }

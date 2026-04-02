@@ -51,59 +51,62 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-brand-bg px-4 py-8">
-      <div className="w-full max-w-[23rem]">
-        <div className="w-full rounded-[18px] border border-brand-border/80 bg-white px-5 py-5 shadow-sm md:px-6 md:py-6">
-          <div className="mb-5 text-center">
-            <h1 className="font-display text-[1.5rem] font-bold tracking-tight text-brand-primary">BIT HOSTEL PORTAL</h1>
-            <h1 className="font-display text-[1.5rem] font-bold tracking-tight text-brand-primary">Hi, Welcome Back!</h1>
+      <div className="w-full max-w-md">
+        <div className="rounded-2xl border border-brand-border bg-white px-6 py-7 shadow-sm sm:px-7">
+          <div className="mb-6 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary text-sm font-bold text-white">
+              BIT
+            </div>
+            <h1 className="mt-4 font-display text-2xl font-bold tracking-tight text-brand-text">Hostel Portal Login</h1>
+            <p className="mt-2 text-sm text-brand-muted">Sign in to continue to your dashboard.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="mx-auto space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="login-email" className="mb-1.5 block text-[0.95rem] font-medium text-black">Username</label>
+              <label htmlFor="login-email" className="mb-2 block text-sm font-medium text-gray-700">Email</label>
               <input
                 id="login-email"
                 type="email"
-                placeholder="Enter your username"
+                placeholder="Enter your email"
                 value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                className="h-11 w-full rounded-md border border-brand-border bg-[#EEF2FB] px-3.5 text-[0.95rem] text-brand-text placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary/15"
+                className="h-11 w-full rounded-xl border border-brand-border bg-[#EEF2FB] px-3.5 text-sm text-brand-text placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary/15"
                 required
               />
             </div>
+
             <div>
-              <label htmlFor="login-password" className="mb-1.5 block text-[0.95rem] font-medium text-black">Password</label>
+              <label htmlFor="login-password" className="mb-2 block text-sm font-medium text-gray-700">Password</label>
               <input
                 id="login-password"
                 type="password"
                 placeholder="Enter your password"
                 value={form.password}
                 onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                className="h-11 w-full rounded-md border border-brand-border bg-[#EEF2FB] px-3.5 text-[0.95rem] text-brand-text placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary/15"
+                className="h-11 w-full rounded-xl border border-brand-border bg-[#EEF2FB] px-3.5 text-sm text-brand-text placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary/15"
                 required
               />
             </div>
+
             <Button
               type="submit"
               size="md"
               loading={loading}
-              className="mt-1 h-11 w-full justify-center rounded-md bg-gradient-to-r from-brand-primary to-brand-primary-light text-[0.95rem] text-white shadow-none hover:translate-y-0"
+              className="h-11 w-full justify-center rounded-xl"
             >
               Login
             </Button>
           </form>
 
-          <div className="my-4 text-center text-[0.95rem] text-black">
-            <span>Or</span>
-          </div>
+          <div className="my-5 text-center text-sm text-gray-500">Or</div>
 
           <div className="flex justify-center">
-            <div className="overflow-hidden rounded-md border border-brand-border bg-white">
+            <div className="overflow-hidden rounded-xl border border-brand-border bg-white">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={handleGoogleError}
                 theme="outline"
-                size="medium"
+                size="large"
                 text="signin_with"
                 shape="rectangular"
               />

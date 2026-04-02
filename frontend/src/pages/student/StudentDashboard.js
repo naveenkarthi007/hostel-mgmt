@@ -46,11 +46,46 @@ export default function StudentDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Complaints" value={complaintStats?.total || 0} color="primary" />
-        <StatCard title="Pending" value={complaintStats?.pending || 0} color="amber" />
-        <StatCard title="In Progress" value={complaintStats?.in_progress || 0} color="blue" />
-        <StatCard title="Resolved" value={complaintStats?.resolved || 0} color="green" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-primary/10 to-[#7e57c2]/10 text-brand-primary flex items-center justify-center">
+              <AlertCircle className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-gray-500 text-xs uppercase tracking-widest">Total</h3>
+          </div>
+          <div className="text-4xl font-black text-gray-900 group-hover:text-brand-primary transition-colors">{complaintStats?.total || 0}</div>
+        </div>
+
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center">
+              <Clock className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-gray-500 text-xs uppercase tracking-widest">Pending</h3>
+          </div>
+          <div className="text-4xl font-black text-gray-900 group-hover:text-amber-500 transition-colors">{complaintStats?.pending || 0}</div>
+        </div>
+
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center">
+              <MapPin className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-gray-500 text-xs uppercase tracking-widest">Progress</h3>
+          </div>
+          <div className="text-4xl font-black text-gray-900 group-hover:text-blue-500 transition-colors">{complaintStats?.in_progress || 0}</div>
+        </div>
+
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all group">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-gray-500 text-xs uppercase tracking-widest">Resolved</h3>
+          </div>
+          <div className="text-4xl font-black text-gray-900 group-hover:text-emerald-500 transition-colors">{complaintStats?.resolved || 0}</div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -66,37 +101,39 @@ export default function StudentDashboard() {
           </div>
 
           {student?.room_number ? (
-            <div className="space-y-6">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-slate-50 rounded-xl p-4 border border-gray-100 flex flex-col items-center justify-center text-center">
-                  <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Room</div>
-                  <div className="text-2xl font-black text-brand-primary">{student.room_number}</div>
+            <div className="space-y-6 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gradient-to-br from-brand-primary to-[#7e57c2] rounded-2xl p-6 border border-transparent shadow-lg flex flex-col items-center justify-center text-center group transform transition-all hover:scale-[1.02]">
+                  <div className="text-xs font-bold text-white/80 uppercase tracking-widest mb-1 group-hover:text-white transition-colors">Room</div>
+                  <div className="text-4xl font-black text-white drop-shadow-md">{student.room_number}</div>
                 </div>
-                <div className="bg-slate-50 rounded-xl p-4 border border-gray-100 flex flex-col items-center justify-center text-center">
-                  <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Block</div>
-                  <div className="text-2xl font-black text-gray-800">{student.block}</div>
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center group hover:shadow-md transition-all">
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 group-hover:text-brand-primary transition-colors">Block</div>
+                  <div className="text-3xl font-black text-gray-800">{student.block}</div>
                 </div>
-                <div className="bg-slate-50 rounded-xl p-4 border border-gray-100 flex flex-col items-center justify-center text-center">
-                  <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Floor</div>
-                  <div className="text-2xl font-black text-gray-800">{student.floor}</div>
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center group hover:shadow-md transition-all">
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 group-hover:text-brand-primary transition-colors">Floor</div>
+                  <div className="text-3xl font-black text-gray-800">{student.floor}</div>
                 </div>
               </div>
 
               {roommates.length > 0 && (
-                <div className="pt-4 border-t border-gray-100">
-                  <h3 className="font-semibold text-gray-900 mb-3">
-                    {roommates.length} {roommates.length === 1 ? 'Roommate' : 'Roommates'}
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="pt-6 border-t border-gray-100 mt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-gray-900">
+                      Roommates <span className="text-gray-400 font-medium ml-1">({roommates.length})</span>
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {roommates.map((roommate, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-100 shadow-sm">
-                        <div className="w-10 h-10 rounded-full bg-indigo-50 text-brand-primary flex items-center justify-center font-bold">
+                      <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-[#f8f9fa] border border-gray-100 hover:bg-white hover:shadow-md transition-all group">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-primary to-[#7e57c2] text-white flex items-center justify-center font-bold text-lg shadow-sm">
                           {roommate.name[0]}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-gray-900 truncate">{roommate.name}</div>
-                          <div className="text-xs text-gray-500">
-                            {roommate.department} • Year {roommate.year}
+                          <div className="font-bold text-gray-900 truncate group-hover:text-brand-primary transition-colors">{roommate.name}</div>
+                          <div className="text-xs font-semibold text-gray-500 mt-0.5">
+                            {roommate.department} <span className="text-gray-300 mx-1">•</span> Yr {roommate.year}
                           </div>
                         </div>
                       </div>

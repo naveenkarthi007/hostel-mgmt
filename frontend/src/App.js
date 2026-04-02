@@ -14,21 +14,30 @@ import RoomsPage from './pages/RoomsPage';
 import AllocationsPage from './pages/AllocationsPage';
 import ComplaintsPage from './pages/ComplaintsPage';
 import NoticesPage from './pages/NoticesPage';
-import WardenLeaveApprovals from './pages/warden/WardenLeaveApprovals';
-import StudentDashboard from './pages/student/StudentDashboard';
+import WardenLeaveApprovals from './pages/warden/WardenLeaveApprovalsPortal';
+import StudentDashboard from './pages/student/StudentDashboardPortal';
 import StudentProfile from './pages/student/StudentProfile';
-import StudentLeaveRequest from './pages/student/StudentLeaveRequest';
+import StudentLeaveRequest from './pages/student/StudentLeaveRequestPortal';
 import StudentComplaints from './pages/student/StudentComplaints';
-import StudentNotices from './pages/student/StudentNotices';
+import StudentNotices from './pages/student/StudentNoticesPortal';
 import MessMenuPage from './pages/MessMenuPage';
-import CaretakerDashboard from './pages/caretaker/CaretakerDashboard';
-import CaretakerComplaints from './pages/caretaker/CaretakerComplaints';
-import WardenDashboard from './pages/warden/WardenDashboard';
-import WardenStudents from './pages/warden/WardenStudents';
-import WardenComplaints from './pages/warden/WardenComplaints';
+import CaretakerDashboard from './pages/caretaker/CaretakerDashboardPortal';
+import CaretakerComplaints from './pages/caretaker/CaretakerComplaintsPortal';
+import WardenDashboard from './pages/warden/WardenDashboardPortal';
+import WardenStudents from './pages/warden/WardenStudentsPortal';
+import WardenComplaints from './pages/warden/WardenComplaintsPortal';
 import { Spinner } from './components/ui';
 
 import VisitorManagementPage from './pages/VisitorManagementPage';
+
+function getHomePath({ user, isAdmin, isCaretaker, isWarden, isStudent }) {
+  if (!user) return '/login';
+  if (isAdmin) return '/';
+  if (isCaretaker) return '/caretaker';
+  if (isWarden) return '/warden';
+  if (isStudent) return '/student';
+  return '/login';
+}
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -41,35 +50,36 @@ function ProtectedRoute({ children }) {
 }
 
 function AdminRoute({ children }) {
-  const { isAdmin } = useAuth();
-  if (!isAdmin) return <Navigate to="/student" replace />;
+  const auth = useAuth();
+  if (!auth.isAdmin) return <Navigate to={getHomePath(auth)} replace />;
   return children;
 }
 
 function CaretakerRoute({ children }) {
-  const { isCaretaker, isAdmin } = useAuth();
-  if (!isCaretaker && !isAdmin) return <Navigate to="/student" replace />;
+  const auth = useAuth();
+  if (!auth.isCaretaker && !auth.isAdmin) return <Navigate to={getHomePath(auth)} replace />;
   return children;
 }
 
 function WardenRoute({ children }) {
-  const { isWarden, isAdmin } = useAuth();
-  if (!isWarden && !isAdmin) return <Navigate to="/student" replace />;
+  const auth = useAuth();
+  if (!auth.isWarden && !auth.isAdmin) return <Navigate to={getHomePath(auth)} replace />;
   return children;
 }
 
 function StudentRoute({ children }) {
-  const { isStudent } = useAuth();
-  if (!isStudent) return <Navigate to="/" replace />;
+  const auth = useAuth();
+  if (!auth.isStudent) return <Navigate to={getHomePath(auth)} replace />;
   return children;
 }
 
 function AppRoutes() {
-  const { user, isAdmin, isCaretaker, isWarden } = useAuth();
+  const auth = useAuth();
+  const { user } = auth;
 
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to={isAdmin ? '/' : isCaretaker ? '/caretaker' : isWarden ? '/warden' : '/student'} replace /> : <LoginPage />} />
+      <Route path="/login" element={user ? <Navigate to={getHomePath(auth)} replace /> : <LoginPage />} />
 
       {/* Admin Routes */}
       <Route path="/*" element={

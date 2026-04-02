@@ -42,6 +42,20 @@ CREATE TABLE IF NOT EXISTS rooms (
   INDEX idx_rooms_room_number (room_number)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS floor_warden_assignments (
+  id           INT AUTO_INCREMENT PRIMARY KEY,
+  block        ENUM('A','B','C','D') NOT NULL,
+  floor        TINYINT NOT NULL,
+  wing         ENUM('left','right') NOT NULL,
+  warden_id    INT NOT NULL,
+  created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_floor_wing (block, floor, wing),
+  UNIQUE KEY uniq_floor_warden (block, floor, warden_id),
+  INDEX idx_floor_lookup (block, floor),
+  FOREIGN KEY (warden_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ── STUDENTS TABLE (Student Records) ──
 CREATE TABLE IF NOT EXISTS students (
   id           INT AUTO_INCREMENT PRIMARY KEY,

@@ -16,6 +16,7 @@ const wardenCtrl     = require('../controllers/wardenController');
 const visitorCtrl    = require('../controllers/visitorController');
 const leaveCtrl      = require('../controllers/leaveController');
 const messCtrl       = require('../controllers/messMenuController');
+const floorWardenCtrl = require('../controllers/floorWardenController');
 const multer         = require('multer');
 
 const upload = multer({ dest: 'uploads/' });
@@ -47,6 +48,9 @@ router.put   ('/students/:id',     authenticate, adminOnly, studentCtrl.update);
 router.delete('/students/:id',     authenticate, adminOnly, studentCtrl.remove);
 
 // ── Rooms (Admin) ────────────────────────────────────────
+router.get   ('/rooms/wardens', authenticate, adminOnly, floorWardenCtrl.getWardens);
+router.get   ('/rooms/floor-wardens', authenticate, adminOnly, floorWardenCtrl.getAssignments);
+router.put   ('/rooms/floor-wardens', authenticate, adminOnly, floorWardenCtrl.setAssignments);
 router.get   ('/rooms',      authenticate, adminOnly, roomCtrl.getAll);
 router.get   ('/rooms/:id',  authenticate, adminOnly, roomCtrl.getOne);
 router.post  ('/rooms',      authenticate, adminOnly, roomCtrl.create);

@@ -289,7 +289,7 @@ export default function StudentsPage() {
     <div
       className="min-h-screen p-6 md:p-8"
       style={{
-        background: `linear-gradient(180deg, ${COLORS.primarybg} 0%, #F7F8FC 100%)`,
+        background: 'transparent',
         color: COLORS.primarytext,
       }}
     >

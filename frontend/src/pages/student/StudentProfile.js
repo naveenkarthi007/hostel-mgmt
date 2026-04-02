@@ -54,7 +54,7 @@ export default function StudentProfile() {
   const roomState = parseRoomStatus();
 
   return (
-    <div className="pb-12 bg-slate-50 min-h-screen pt-8">
+    <div className="pb-12 min-h-screen pt-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col gap-6">
 
@@ -69,33 +69,33 @@ export default function StudentProfile() {
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 150 }}
-              className="w-28 h-28 sm:w-32 sm:h-32 rounded-[2rem] flex items-center justify-center text-white font-black text-4xl shadow-xl border-4 border-white flex-shrink-0 bg-gradient-to-br from-brand-primary to-brand-primary-light"
+              className="w-24 h-24 sm:w-28 sm:h-28 rounded-[2rem] flex items-center justify-center text-white font-bold text-4xl shadow-md flex-shrink-0 bg-gradient-to-br from-brand-primary to-[#7e57c2]"
             >
               {profile.name.charAt(0).toUpperCase()}
             </motion.div>
 
             <div className="flex-1 pt-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-bold tracking-wide uppercase mb-3">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-primary/10 text-brand-primary text-[10px] font-bold tracking-widest uppercase mb-3">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 Verified Student
               </div>
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 tracking-tight mb-2">
+              <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight mb-2 uppercase">
                 {profile.name}
               </h1>
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-4 text-sm font-medium text-gray-500">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-4 text-xs font-bold text-gray-400 uppercase tracking-widest">
                 <div className="flex items-center gap-1.5">
-                  <BookOpen className="w-4 h-4 text-gray-400" /> {profile.register_no}
+                  <BookOpen className="w-4 h-4 text-gray-300" /> {profile.register_no}
                 </div>
-                <div className="hidden sm:block text-gray-300">•</div>
+                <div className="hidden sm:block text-gray-200">•</div>
                 <div className="flex items-center gap-1.5">
-                  <Building2 className="w-4 h-4 text-gray-400" /> {profile.department}
+                  <Building2 className="w-4 h-4 text-gray-300" /> {profile.department}
                 </div>
               </div>
             </div>
 
             <div className="md:self-end pt-4 md:pt-0">
-              <div className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border ${roomState.bg} ${roomState.border} ${roomState.color} font-semibold text-sm shadow-sm`}>
-                <CheckCircle2 className="w-5 h-5" />
+              <div className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full border ${roomState.bg} ${roomState.border} ${roomState.color} font-bold text-xs shadow-sm tracking-wide uppercase`}>
+                <CheckCircle2 className="w-4 h-4" />
                 {roomState.text}
               </div>
             </div>
@@ -125,16 +125,16 @@ export default function StudentProfile() {
                     { icon: Building2, label: 'Department', value: profile.department, color: 'text-purple-600', bg: 'bg-purple-50' },
                     { icon: Calendar, label: 'Academic Year', value: `Year ${profile.year}`, color: 'text-pink-600', bg: 'bg-pink-50' },
                     { icon: Phone, label: 'Contact Phone', value: profile.phone || 'N/A', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                    { icon: Mail, label: 'Email Address', value: profile.email || 'N/A', color: 'text-blue-600', bg: 'bg-blue-50' },
+                    { icon: Mail, label: 'Email Address', value: profile.email || 'N/A', color: 'text-blue-600', bg: 'bg-blue-50', span: true },
                   ].map((field, i) => (
-                    <div key={i} className="group p-4 rounded-2xl bg-gray-50 border border-transparent hover:bg-white hover:border-gray-200 hover:shadow-sm transition-all duration-300">
+                    <div key={i} className={`group p-4 rounded-xl shadow-sm bg-[#f8f9fa] border border-gray-100 hover:bg-white transition-all duration-300 ${field.span ? 'sm:col-span-2' : ''}`}>
                       <div className="flex items-start gap-4">
-                        <div className={`mt-0.5 w-10 h-10 rounded-xl ${field.bg} ${field.color} flex items-center justify-center shrink-0`}>
-                          <field.icon className="w-5 h-5" />
+                        <div className={`mt-0.5 w-8 h-8 rounded-lg ${field.bg} ${field.color} flex items-center justify-center shrink-0`}>
+                          <field.icon className="w-4 h-4" />
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{field.label}</p>
-                          <p className="font-semibold text-gray-900">{field.value}</p>
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{field.label}</p>
+                          <p className="text-sm font-bold text-gray-900">{field.value}</p>
                         </div>
                       </div>
                     </div>
@@ -174,27 +174,33 @@ export default function StudentProfile() {
 
                 {profile.room_number ? (
                   <div className="space-y-4">
-                    <div className="p-6 rounded-3xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 text-center relative overflow-hidden group">
-                      <div className="absolute inset-0 bg-brand-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Room Number</p>
+                    <div className="p-6 rounded-2xl bg-[#f8f9fa] border border-gray-100 text-center transition-all group">
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Room Number</p>
                       <p className="text-4xl font-black text-brand-primary tracking-tight">{profile.room_number}</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col items-center justify-center text-center">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Block</p>
-                        <p className="text-xl font-bold text-gray-800">{profile.block}</p>
+                      <div className="p-4 rounded-2xl bg-[#f8f9fa] border border-gray-100 flex flex-col items-center justify-center text-center">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Block</p>
+                        <p className="text-lg font-bold text-gray-800">{profile.block}</p>
                       </div>
-                      <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex flex-col items-center justify-center text-center">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Floor</p>
-                        <p className="text-xl font-bold text-gray-800">{profile.floor}</p>
+                      <div className="p-4 rounded-2xl bg-[#f8f9fa] border border-gray-100 flex flex-col items-center justify-center text-center">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Floor</p>
+                        <p className="text-lg font-bold text-gray-800">{profile.floor}</p>
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 mt-4 flex items-center justify-between">
-                      <p className="text-xs font-semibold text-gray-500">Room Type</p>
-                      <p className="text-sm font-bold text-gray-900 capitalize px-3 py-1 bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div className="py-3 px-4 rounded-2xl bg-gray-50/50 border border-gray-100 flex items-center justify-between">
+                      <p className="text-xs font-medium text-gray-500">Room Type</p>
+                      <p className="text-xs font-bold text-gray-900 capitalize px-3 py-1 bg-white rounded-lg shadow-sm border border-gray-200">
                         {profile.room_type}
+                      </p>
+                    </div>
+
+                    <div className="py-3 px-4 rounded-2xl bg-gray-50/50 border border-gray-100 flex items-center justify-between">
+                      <p className="text-xs font-medium text-gray-500">Warden Name</p>
+                      <p className="text-xs font-bold text-gray-900 px-3 py-1 bg-white rounded-lg shadow-sm border border-gray-200">
+                        {profile.warden_name || 'Head Warden'}
                       </p>
                     </div>
                   </div>

@@ -58,6 +58,9 @@ export const roomsAPI = {
   create:  (d)    => api.post('/rooms', d),
   update:  (id,d) => api.put(`/rooms/${id}`, d),
   delete:  (id)   => api.delete(`/rooms/${id}`),
+  getWardens: ()  => api.get('/rooms/wardens'),
+  getFloorWardens: (p) => api.get('/rooms/floor-wardens', { params: p }),
+  setFloorWardens: (d) => api.put('/rooms/floor-wardens', d),
   exportCSV: ()   => api.get('/rooms/export', { responseType: 'blob' }),
   importCSV: (f)  => api.post('/bulk/rooms', f),
 };

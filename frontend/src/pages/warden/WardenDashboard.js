@@ -151,32 +151,32 @@ export default function WardenDashboard() {
           </div>
         </div>
 
-        <div className="-mx-6 -mb-6">
-          <Table>
-            <thead>
+        <div className="-mx-6 -mb-6 border-t border-gray-100">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs font-semibold uppercase tracking-wider">
               <tr>
-                <th>Student</th>
-                <th>Register No</th>
-                <th>Department</th>
-                <th>Year</th>
-                <th>Date Added</th>
+                <th className="px-6 py-3 whitespace-nowrap">Student</th>
+                <th className="px-6 py-3 whitespace-nowrap">Register No</th>
+                <th className="px-6 py-3 whitespace-nowrap">Department</th>
+                <th className="px-6 py-3 whitespace-nowrap">Year</th>
+                <th className="px-6 py-3 whitespace-nowrap">Date Added</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-100 bg-white">
               {recentStudents.length > 0 ? (
                 recentStudents.map((student, i) => (
-                  <tr key={student.id}>
-                    <td>
+                  <tr key={student.id} className="transition-colors group hover:bg-gray-50">
+                    <td className="px-6 py-4 text-gray-700 whitespace-nowrap">
                       <div className="font-semibold text-gray-900">{student.name}</div>
                     </td>
-                    <td><Badge variant="outline" className="font-mono text-xs">{student.register_no}</Badge></td>
-                    <td><div className="text-gray-600">{student.department}</div></td>
-                    <td>
+                    <td className="px-6 py-4 text-gray-700 whitespace-nowrap"><Badge variant="outline" className="font-mono text-xs">{student.register_no}</Badge></td>
+                    <td className="px-6 py-4 text-gray-700 whitespace-nowrap"><div className="text-gray-600">{student.department}</div></td>
+                    <td className="px-6 py-4 text-gray-700 whitespace-nowrap">
                       <span className="inline-flex items-center px-2 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-semibold">
                         Year {student.year}
                       </span>
                     </td>
-                    <td><div className="text-gray-500">{format(new Date(student.created_at), 'dd MMM yyyy')}</div></td>
+                    <td className="px-6 py-4 text-gray-700 whitespace-nowrap"><div className="text-gray-500">{format(new Date(student.created_at), 'dd MMM yyyy')}</div></td>
                   </tr>
                 ))
               ) : (
@@ -191,7 +191,7 @@ export default function WardenDashboard() {
                 </tr>
               )}
             </tbody>
-          </Table>
+          </table>
         </div>
       </Card>
     </div>

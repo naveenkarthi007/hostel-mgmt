@@ -1,5 +1,23 @@
 const { pool } = require('../config/database');
 
+const getFloorWardens = async (block, floor) => {
+  if (!block || !floor) return [];
+  try {
+    const [rows] = await pool.query(
+      `SELECT fwa.wing, u.name
+       FROM floor_warden_assignments fwa
+       INNER JOIN users u ON u.id = fwa.warden_id
+       WHERE fwa.block = ? AND fwa.floor = ?
+       ORDER BY FIELD(fwa.wing, 'left', 'right') ASC, u.name ASC`,
+      [block, floor]
+    );
+    return rows.map(row => `${row.wing === 'left' ? 'Left Wing' : 'Right Wing'}: ${row.name}`);
+  } catch (error) {
+    // Keep profile/dashboard usable even if the assignment table has not been created yet.
+    return [];
+  }
+};
+
 // Get the student record linked to the logged-in user (by user_id or email)
 const findStudentByUser = async (userId) => {
   // First try to find student linked by user_id
@@ -9,7 +27,13 @@ const findStudentByUser = async (userId) => {
      WHERE s.user_id=?`,
     [userId]
   );
-  if (byUserId.length) return byUserId[0];
+  if (byUserId.length) {
+    const student = byUserId[0];
+    const wardens = await getFloorWardens(student.block, student.floor);
+    student.warden_names = wardens;
+    student.warden_name = wardens.join(', ');
+    return student;
+  }
 
   // Fall back to matching by email
   const [users] = await pool.query('SELECT email FROM users WHERE id=?', [userId]);
@@ -20,7 +44,12 @@ const findStudentByUser = async (userId) => {
      WHERE s.email=?`,
     [users[0].email]
   );
-  return byEmail.length ? byEmail[0] : null;
+  if (!byEmail.length) return null;
+  const student = byEmail[0];
+  const wardens = await getFloorWardens(student.block, student.floor);
+  student.warden_names = wardens;
+  student.warden_name = wardens.join(', ');
+  return student;
 };
 
 const getMyProfile = async (req, res) => {

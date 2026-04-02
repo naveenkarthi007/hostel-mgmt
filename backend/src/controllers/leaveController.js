@@ -1,5 +1,13 @@
 const { pool } = require('../config/database');
 
+const getLinkedStudentId = async (user) => {
+  let [studentRows] = await pool.query('SELECT id FROM students WHERE user_id = ?', [user.id]);
+  if (!studentRows.length) {
+    [studentRows] = await pool.query('SELECT id FROM students WHERE email = ?', [user.email]);
+  }
+  return studentRows[0]?.id || null;
+};
+
 const getAll = async (req, res) => {
   try {
     const { status, student_id, page = 1, limit = 20 } = req.query;
@@ -92,7 +100,24 @@ const updateStatus = async (req, res) => {
 
 const remove = async (req, res) => {
   try {
-    const [result] = await pool.query('DELETE FROM leaves WHERE id = ? AND status = "pending"', [req.params.id]);
+    let result;
+
+    if (['admin', 'warden'].includes(req.user.role)) {
+      [result] = await pool.query('DELETE FROM leaves WHERE id = ?', [req.params.id]);
+    } else if (req.user.role === 'student') {
+      const studentId = await getLinkedStudentId(req.user);
+      if (!studentId) {
+        return res.status(404).json({ success: false, message: 'Student profile not linked.' });
+      }
+
+      [result] = await pool.query(
+        'DELETE FROM leaves WHERE id = ? AND status = "pending" AND student_id = ?',
+        [req.params.id, studentId]
+      );
+    } else {
+      return res.status(403).json({ success: false, message: 'Access denied.' });
+    }
+
     if (result.affectedRows === 0) {
       return res.status(404).json({ success: false, message: 'Leave not found or cannot be deleted.' });
     }
