@@ -20,13 +20,17 @@ exports.bulkStudents = async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const rows = await parseCSV(req.file.path);
+    let rows = [];
     let successCount = 0;
     let failedCount = 0;
     const errors = [];
 
-    // Delete file after reading
-    fs.unlinkSync(req.file.path);
+    try {
+      rows = await parseCSV(req.file.path);
+    } finally {
+      // Ensure local file is ALWAYS deleted even if parsing corrupts
+      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    }
 
     // Process rows
     for (let i = 0; i < rows.length; i++) {
@@ -97,19 +101,23 @@ exports.bulkRooms = async (req, res) => {
         return res.status(400).json({ error: 'No file uploaded' });
       }
   
-      const rows = await parseCSV(req.file.path);
+      let rows = [];
       let successCount = 0;
       let failedCount = 0;
       const errors = [];
   
-      fs.unlinkSync(req.file.path);
+      try {
+        rows = await parseCSV(req.file.path);
+      } finally {
+        if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      }
   
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         const rowNum = i + 1;
   
         try {
-          const { roomNumber, block, capacity, type } = row;
+          const { roomNumber, block, floor, capacity, type } = row;
           
           if (!roomNumber || !block || !capacity) {
             throw new Error('roomNumber, block, and capacity are required');
@@ -129,9 +137,9 @@ exports.bulkRooms = async (req, res) => {
           }
   
           await pool.query(`
-            INSERT INTO rooms (room_number, block, capacity, type, status) 
-            VALUES (?, ?, ?, ?, 'available')
-          `, [roomNumber, block, capacity, type || 'Non-AC']);
+            INSERT INTO rooms (room_number, block, floor, capacity, room_type, status) 
+            VALUES (?, ?, ?, ?, ?, 'available')
+          `, [roomNumber, block, parseInt(floor) || 1, capacity, type || 'triple']);
   
           successCount++;
         } catch (err) {
@@ -148,6 +156,5 @@ exports.bulkRooms = async (req, res) => {
   };
   
 exports.bulkAllocations = async (req, res) => {
-    // Add similar logic for allocations
-    res.json({ successCount: 0, failedCount: 0, errors: [{ row: 1, reason: 'Pending implementation' }] });
+    res.status(501).json({ success: false, message: 'Bulk allocation import is not yet implemented.' });
 };

@@ -30,7 +30,7 @@ const getOne = async (req, res) => {
     );
     if (!rows.length) return res.status(404).json({ success: false, message: 'Student not found.' });
     res.json({ success: true, data: rows[0] });
-  } catch (err) { res.status(500).json({ success: false, message: 'Server error.' }); }
+  } catch (err) { console.error('Error in ' + __filename + ':', err); res.status(500).json({ success: false, message: 'Server error.' }); }
 };
 
 const create = async (req, res) => {
@@ -57,7 +57,7 @@ const update = async (req, res) => {
       [name,department,year,phone,email,address,req.params.id]
     );
     res.json({ success: true, message: 'Student updated.' });
-  } catch (err) { res.status(500).json({ success: false, message: 'Server error.' }); }
+  } catch (err) { console.error('Error in ' + __filename + ':', err); res.status(500).json({ success: false, message: 'Server error.' }); }
 };
 
 const remove = async (req, res) => {
@@ -69,7 +69,7 @@ const remove = async (req, res) => {
     }
     await pool.query('DELETE FROM students WHERE id=?', [req.params.id]);
     res.json({ success: true, message: 'Student deleted.' });
-  } catch (err) { res.status(500).json({ success: false, message: 'Server error.' }); }
+  } catch (err) { console.error('Error in ' + __filename + ':', err); res.status(500).json({ success: false, message: 'Server error.' }); }
 };
 
 const exportCSV = async (req, res) => {
@@ -82,7 +82,7 @@ const exportCSV = async (req, res) => {
     res.header('Content-Type','text/csv');
     res.attachment('students.csv');
     res.send(csv);
-  } catch (err) { res.status(500).json({ success: false, message: 'Export failed.' }); }
+  } catch (err) { console.error('Error in ' + __filename + ':', err); res.status(500).json({ success: false, message: 'Export failed.' }); }
 };
 
 module.exports = { getAll, getOne, create, update, remove, exportCSV };

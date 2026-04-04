@@ -1,4 +1,5 @@
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const api = axios.create({ baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api', timeout: 10000 });
 
@@ -11,9 +12,19 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   r => r,
   err => {
-    if (err.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+    if (err.response) {
+      const status = err.response.status;
+      if (status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      } else if (status >= 400) {
+        const message = err.response.data?.message || 'An error occurred';
+        toast.error(`Error ${status}: ${message}`);
+      }
+    } else if (err.request) {
+      toast.error('Network error. Please check your connection.');
+    } else {
+      toast.error('An unexpected error occurred.');
     }
     return Promise.reject(err);
   }
@@ -90,6 +101,8 @@ export const visitorsAPI = {
   create:   (d)    => api.post('/visitors', d),
   markExit: (id)   => api.put(`/visitors/${id}/exit`),
   delete:   (id)   => api.delete(`/visitors/${id}`),
+  getMine:  ()     => api.get('/student/visitors'),
+  createMine: (d)  => api.post('/student/visitors', d),
 };
 
 export const leavesAPI = {
@@ -111,6 +124,39 @@ export const studentPortalAPI = {
   fileComplaint: (d) => api.post('/student/complaints', d),
   updateComplaint:  (id, d) => api.put(`/student/complaints/${id}`, d),
   resolveComplaint: (id)    => api.patch(`/student/complaints/${id}/resolve`),
+};
+
+export const hostelApplicationsAPI = {
+  getAll:           (p)    => api.get('/hostel-applications', { params: p }),
+  getMyApplications: ()    => api.get('/student/hostel-applications'),
+  create:           (d)    => api.post('/student/hostel-applications', d),
+  review:           (id,d) => api.put(`/hostel-applications/${id}`, d),
+};
+
+export const requestsAPI = {
+  getAll:       (p)    => api.get('/requests', { params: p }),
+  getMyRequests: ()    => api.get('/student/requests'),
+  create:       (d)    => api.post('/student/requests', d),
+  review:       (id,d) => api.put(`/requests/${id}`, d),
+};
+
+export const attendanceAPI = {
+  getAll:         (p) => api.get('/attendance', { params: p }),
+  getMyAttendance: (p) => api.get('/student/attendance', { params: p }),
+  mark:           (d) => api.post('/attendance', d),
+  bulkMark:       (d) => api.post('/attendance/bulk', d),
+};
+
+export const staffDirectoryAPI = {
+  getAll: () => api.get('/staff-directory'),
+};
+
+export const usersAPI = {
+  getAll:  (p)    => api.get('/users', { params: p }),
+  getOne:  (id)   => api.get(`/users/${id}`),
+  create:  (d)    => api.post('/users', d),
+  update:  (id,d) => api.put(`/users/${id}`, d),
+  delete:  (id)   => api.delete(`/users/${id}`),
 };
 
 export default api;

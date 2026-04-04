@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { studentPortalAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import { Card, Badge, Spinner, Button, PageHeader, StatCard } from '../../components/ui';
+import { Card, Badge, Spinner, Button, PageHeader } from '../../components/ui';
 import { format } from 'date-fns';
 import { AlertCircle, CheckCircle2, Clock, MapPin } from 'lucide-react';
 

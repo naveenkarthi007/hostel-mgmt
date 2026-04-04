@@ -15,7 +15,6 @@ const BulkUploadModal = ({ isOpen, onClose, title, columns, sampleData, uploadEn
   const downloadSample = () => {
     const csv = Papa.unparse(sampleData);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('url');
     const url = URL.createObjectURL(blob);
     
     const a = document.createElement('a');

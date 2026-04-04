@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+
 import { wardenAPI } from '../../services/api';
-import { Spinner, Badge, StatCard, PageHeader, Card, Table } from '../../components/ui';
+import { Spinner, Badge, StatCard, PageHeader, Card } from '../../components/ui';
 import { Users, Home, AlertCircle, Building2, UserPlus, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';

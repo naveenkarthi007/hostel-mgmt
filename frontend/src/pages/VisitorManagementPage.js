@@ -53,10 +53,12 @@ export default function VisitorManagementPage() {
 
   useEffect(() => {
     fetchVisitors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, statusFilter]);
 
   useEffect(() => {
     fetchStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCreate = async (e) => {

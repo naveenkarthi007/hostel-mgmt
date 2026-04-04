@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { complaintsAPI, studentsAPI } from '../services/api';
@@ -19,14 +19,14 @@ export default function ComplaintsPage() {
   const [statusForm, setStatusForm] = useState({ status: '', admin_note: '' });
   const [saving, setSaving] = useState(false);
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true);
     complaintsAPI.getAll(filters).then(r => setComplaints(r.data.data)).finally(() => setLoading(false));
-  };
+  }, [filters]);
 
   useEffect(() => {
     load();
-  }, [filters]);
+  }, [load]);
 
   const openAdd = async () => {
     const r = await studentsAPI.getAll({ limit: 200 });

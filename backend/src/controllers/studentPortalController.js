@@ -1,4 +1,5 @@
 const { pool } = require('../config/database');
+const { findBestStaff } = require('../services/smartRouter');
 
 const getFloorWardens = async (block, floor) => {
   if (!block || !floor) return [];
@@ -13,14 +14,12 @@ const getFloorWardens = async (block, floor) => {
     );
     return rows.map(row => `${row.wing === 'left' ? 'Left Wing' : 'Right Wing'}: ${row.name}`);
   } catch (error) {
-    // Keep profile/dashboard usable even if the assignment table has not been created yet.
+    console.error('Error fetching wardens:', error);
     return [];
   }
 };
 
-// Get the student record linked to the logged-in user (by user_id or email)
 const findStudentByUser = async (userId) => {
-  // First try to find student linked by user_id
   const [byUserId] = await pool.query(
     `SELECT s.*, r.room_number, r.block, r.floor, r.room_type
      FROM students s LEFT JOIN rooms r ON s.room_id=r.id
@@ -35,7 +34,6 @@ const findStudentByUser = async (userId) => {
     return student;
   }
 
-  // Fall back to matching by email
   const [users] = await pool.query('SELECT email FROM users WHERE id=?', [userId]);
   if (!users.length) return null;
   const [byEmail] = await pool.query(
@@ -67,14 +65,10 @@ const getMyProfile = async (req, res) => {
 const getMyDashboard = async (req, res) => {
   try {
     const student = await findStudentByUser(req.user.id);
-
-    // Even if not linked, return partial data
     const dashData = { student: null, roommates: [], complaintStats: {}, recentNotices: [] };
 
     if (student) {
       dashData.student = student;
-
-      // Get roommates
       if (student.room_id) {
         const [roommates] = await pool.query(
           'SELECT name, register_no, department, year FROM students WHERE room_id=? AND id!=?',
@@ -82,26 +76,19 @@ const getMyDashboard = async (req, res) => {
         );
         dashData.roommates = roommates;
       }
-
-      // Complaint stats for this student
       const [[stats]] = await pool.query(
-        `SELECT
-           COUNT(*) as total,
-           SUM(status='pending') as pending,
-           SUM(status='in_progress') as in_progress,
-           SUM(status='resolved') as resolved
+        `SELECT COUNT(*) as total, SUM(status='pending') as pending,
+                SUM(status='in_progress') as in_progress, SUM(status='resolved') as resolved
          FROM complaints WHERE student_id=?`,
         [student.id]
       );
       dashData.complaintStats = stats;
     }
 
-    // Recent notices (visible to all students)
     const [notices] = await pool.query(
       'SELECT id, title, content, category, created_at FROM notices ORDER BY created_at DESC LIMIT 5'
     );
     dashData.recentNotices = notices;
-
     res.json({ success: true, data: dashData });
   } catch (err) {
     console.error(err);
@@ -129,8 +116,7 @@ const getMyComplaints = async (req, res) => {
       [...params, parseInt(limit), offset]
     );
     const [[{ total }]] = await pool.query(
-      `SELECT COUNT(*) as total FROM complaints c WHERE ${where}`,
-      params
+      `SELECT COUNT(*) as total FROM complaints c WHERE ${where}`, params
     );
     res.json({ success: true, data: rows, total, page: parseInt(page) });
   } catch (err) {
@@ -149,11 +135,20 @@ const fileComplaint = async (req, res) => {
     if (!title)
       return res.status(400).json({ success: false, message: 'Title is required.' });
 
+    const cat = category || 'other';
+    const staff = await findBestStaff(cat);
+    const assignedTo = staff ? staff.id : null;
+
     const [result] = await pool.query(
-      'INSERT INTO complaints (student_id, title, description, category, priority) VALUES (?,?,?,?,?)',
-      [student.id, title, description, category || 'other', priority || 'medium']
+      'INSERT INTO complaints (student_id, title, description, category, priority, assigned_to) VALUES (?,?,?,?,?,?)',
+      [student.id, title, description, cat, priority || 'medium', assignedTo]
     );
-    res.status(201).json({ success: true, message: 'Complaint filed.', id: result.insertId });
+    res.status(201).json({
+      success: true,
+      message: staff ? `Complaint filed and auto-assigned to ${staff.name}.` : 'Complaint filed.',
+      id: result.insertId,
+      assigned_to: staff,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -170,10 +165,8 @@ const updateMyComplaint = async (req, res) => {
       'SELECT id, status FROM complaints WHERE id=? AND student_id=?',
       [req.params.id, student.id]
     );
-
     if (!complaint)
       return res.status(404).json({ success: false, message: 'Complaint not found.' });
-
     if (complaint.status !== 'pending')
       return res.status(400).json({ success: false, message: 'Only pending complaints can be edited.' });
 
@@ -185,7 +178,6 @@ const updateMyComplaint = async (req, res) => {
       'UPDATE complaints SET title=?, description=?, category=?, priority=? WHERE id=?',
       [title, description || null, category || 'other', priority || 'medium', req.params.id]
     );
-
     res.json({ success: true, message: 'Complaint updated successfully.' });
   } catch (err) {
     console.error(err);
@@ -203,18 +195,12 @@ const resolveMyComplaint = async (req, res) => {
       'SELECT id, status FROM complaints WHERE id=? AND student_id=?',
       [req.params.id, student.id]
     );
-
     if (!complaint)
       return res.status(404).json({ success: false, message: 'Complaint not found.' });
-
     if (complaint.status === 'resolved')
       return res.json({ success: true, message: 'Complaint already marked as resolved.' });
 
-    await pool.query(
-      'UPDATE complaints SET status=? WHERE id=?',
-      ['resolved', req.params.id]
-    );
-
+    await pool.query('UPDATE complaints SET status=? WHERE id=?', ['resolved', req.params.id]);
     res.json({ success: true, message: 'Complaint marked as resolved.' });
   } catch (err) {
     console.error(err);

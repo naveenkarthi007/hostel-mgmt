@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { ChevronRight, Bell, ClipboardList, LayoutGrid, LogOut, Menu, UserRound, X } from 'lucide-react';
+import { ChevronRight, Bell, ClipboardList, LayoutGrid, LogOut, Menu, UserRound, X, Building2, CalendarRange, RefreshCcw, Coffee, Users, UserPlus } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const NAV = [
   { to: '/student', label: 'Dashboard', icon: LayoutGrid },
   { to: '/student/profile', label: 'Profile', icon: UserRound },
+  { to: '/student/applications', label: 'Hostel Application', icon: Building2 },
+  { to: '/student/attendance', label: 'Attendance', icon: CalendarRange },
+  { to: '/student/requests', label: 'Requests', icon: RefreshCcw },
+  { to: '/student/visitors', label: 'Visitor Request', icon: UserPlus },
   { to: '/student/outpass', label: 'Outpass', icon: ClipboardList },
-  { to: '/student/mess-menu', label: 'Mess Menu', icon: LayoutGrid },
+  { to: '/student/mess-menu', label: 'Mess Menu', icon: Coffee },
   { to: '/student/complaints', label: 'Complaints', icon: ClipboardList },
   { to: '/student/notices', label: 'Notices', icon: Bell },
+  { to: '/student/staff-directory', label: 'Staff Directory', icon: Users },
 ];
 
 function NavItem({ to, label, icon: Icon, onClick, end = false }) {

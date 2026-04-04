@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { ChevronRight, Home, Users, CheckSquare, List, Calendar, FileText, Settings, LogOut, Menu, X } from 'lucide-react';
+import { ChevronRight, Home, Users, CheckSquare, List, Calendar, FileText, Settings, LogOut, Menu, X, Building2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const NAV = [
   { to: '/', label: 'Home', icon: Home },
+  { to: '/users', label: 'User Management', icon: Users },
   { to: '/students', label: 'All Students', icon: Users },
+  { to: '/applications', label: 'Applications', icon: Building2 },
   { to: '/rooms', label: 'Rooms Listing', icon: List },
+  { to: '/floor-wardens', label: 'Floor Wardens', icon: Users },
   { to: '/allocations', label: 'Room Allocation', icon: CheckSquare },
   { to: '/outpasses', label: 'Outpass Approvals', icon: CheckSquare },
   { to: '/mess-menu', label: 'Mess Menu', icon: List },

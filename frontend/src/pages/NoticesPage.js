@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { noticesAPI } from '../services/api';
 
-const CAT_BADGE = { urgent: 'danger', general: 'info', maintenance: 'warning', accounts: 'primary', events: 'success' };
+
 
 export default function NoticesPage() {
   const [notices, setNotices] = useState([]);

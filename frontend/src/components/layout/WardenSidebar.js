@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Home, Users, FileText, LogOut, Menu, X, List } from 'lucide-react';
+import { ChevronRight, Home, Users, FileText, LogOut, Menu, X, List, Building2, RefreshCcw, CalendarCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const NAV = [
   { to: '/warden', label: 'Dashboard', icon: Home },
   { to: '/warden/students', label: 'Students', icon: Users },
+  { to: '/warden/applications', label: 'Applications', icon: Building2 },
+  { to: '/warden/requests', label: 'Requests', icon: RefreshCcw },
+  { to: '/warden/attendance', label: 'Attendance', icon: CalendarCheck },
   { to: '/warden/outpasses', label: 'Outpass Approvals', icon: Users },
   { to: '/warden/mess-menu', label: 'Mess Menu', icon: List },
   { to: '/warden/visitors', label: 'Visitors', icon: Users },
@@ -125,58 +128,60 @@ export default function WardenSidebar({ children }) {
       </div>
 
       <AnimatePresence>
-        {mobileOpen ? (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-            />
-            <motion.aside
-              initial={{ x: -250 }}
-              animate={{ x: 0 }}
-              exit={{ x: -250 }}
-              className="fixed inset-y-0 left-0 z-50 w-[272px] flex-col bg-white shadow-lg lg:hidden"
-            >
-              <div className="flex h-[80px] items-center justify-between px-6 border-b border-brand-border/70">
-                <div className="flex items-center gap-2">
-                  <div className="h-10 w-10 bg-sky-500 rounded-lg flex items-center justify-center text-white font-bold text-xs">WRD</div>
-                  <div className="leading-tight">
-                    <div className="text-[14px] font-bold text-gray-900">Warden</div>
-                    <div className="text-[12px] font-semibold text-gray-600">Portal</div>
-                  </div>
+        {mobileOpen && (
+          <motion.div
+            key="warden-mobile-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMobileOpen(false)}
+            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          />
+        )}
+        {mobileOpen && (
+          <motion.aside
+            key="warden-mobile-sidebar"
+            initial={{ x: -250 }}
+            animate={{ x: 0 }}
+            exit={{ x: -250 }}
+            className="fixed inset-y-0 left-0 z-50 flex w-[272px] flex-col bg-white shadow-lg lg:hidden"
+          >
+            <div className="flex h-[80px] items-center justify-between px-6 border-b border-brand-border/70">
+              <div className="flex items-center gap-2">
+                <div className="h-10 w-10 bg-sky-500 rounded-lg flex items-center justify-center text-white font-bold text-xs">WRD</div>
+                <div className="leading-tight">
+                  <div className="text-[14px] font-bold text-gray-900">Warden</div>
+                  <div className="text-[12px] font-semibold text-gray-600">Portal</div>
                 </div>
-                <button onClick={() => setMobileOpen(false)}>
-                  <X className="h-5 w-5 text-gray-600" />
-                </button>
               </div>
+              <button onClick={() => setMobileOpen(false)}>
+                <X className="h-5 w-5 text-gray-600" />
+              </button>
+            </div>
 
-              <nav className="flex-1 overflow-y-auto px-4 pb-5 space-y-0.5">
-                {NAV.map(item => (
-                  <NavItem
-                    key={item.to + item.label}
-                    {...item}
-                    onClick={() => setMobileOpen(false)}
-                    end={item.to === '/warden'}
-                  />
-                ))}
-              </nav>
+            <nav className="flex-1 overflow-y-auto px-4 pb-5 space-y-0.5">
+              {NAV.map(item => (
+                <NavItem
+                  key={item.to + item.label}
+                  {...item}
+                  onClick={() => setMobileOpen(false)}
+                  end={item.to === '/warden'}
+                />
+              ))}
+            </nav>
 
-              <div className="p-4 border-t border-brand-border/70">
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-[13px] font-medium text-gray-600 transition-colors hover:bg-sky-50 hover:text-sky-600"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span>Logout</span>
-                </button>
-              </div>
-            </motion.aside>
-          </>
-        ) : null}
+            <div className="p-4 border-t border-brand-border/70">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-[13px] font-medium text-gray-600 transition-colors hover:bg-sky-50 hover:text-sky-600"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </button>
+            </div>
+          </motion.aside>
+        )}
       </AnimatePresence>
     </div>
   );

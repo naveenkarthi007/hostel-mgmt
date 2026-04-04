@@ -23,6 +23,8 @@ const login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials.' });
 
     const user = rows[0];
+    if (!user.password)
+      return res.status(401).json({ success: false, message: 'This account uses Google login. Please sign in with Google.' });
     const valid = await bcrypt.compare(password, user.password);
     if (!valid)
       return res.status(401).json({ success: false, message: 'Invalid credentials.' });
@@ -65,7 +67,7 @@ const googleLogin = async (req, res) => {
       idToken: credential,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-    const { sub: googleId, email, name, picture } = ticket.getPayload();
+    const { sub: googleId, email, name } = ticket.getPayload();
 
     // 1. Look up by google_id
     let [rows] = await pool.query('SELECT * FROM users WHERE google_id = ?', [googleId]);
@@ -156,8 +158,7 @@ const me = async (req, res) => {
     }
 
     res.json({ success: true, user: userData });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+  } catch (err) { console.error('Error in ' + __filename + ':', err); res.status(500).json({ success: false, message: 'Server error.' });
   }
 };
 
@@ -165,13 +166,14 @@ const changePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
   try {
     const [rows] = await pool.query('SELECT * FROM users WHERE id=?', [req.user.id]);
+    if (!rows[0].password)
+      return res.status(400).json({ success: false, message: 'Cannot change password for Google-linked accounts. Use Google to sign in.' });
     const valid = await bcrypt.compare(currentPassword, rows[0].password);
     if (!valid) return res.status(400).json({ success: false, message: 'Current password incorrect.' });
     const hashed = await bcrypt.hash(newPassword, 10);
     await pool.query('UPDATE users SET password=? WHERE id=?', [hashed, req.user.id]);
     res.json({ success: true, message: 'Password updated.' });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+  } catch (err) { console.error('Error in ' + __filename + ':', err); res.status(500).json({ success: false, message: 'Server error.' });
   }
 };
 

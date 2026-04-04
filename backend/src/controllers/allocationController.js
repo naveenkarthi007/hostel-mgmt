@@ -60,7 +60,7 @@ const history = async (req, res) => {
        ORDER BY a.allocated_at DESC LIMIT 50`
     );
     res.json({ success: true, data: rows });
-  } catch (err) { res.status(500).json({ success: false, message: 'Server error.' }); }
+  } catch (err) { console.error('Error in ' + __filename + ':', err); res.status(500).json({ success: false, message: 'Server error.' }); }
 };
 
 module.exports = { allocate, vacate, history };

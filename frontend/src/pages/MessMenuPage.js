@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { messMenuAPI } from '../services/api';
-import { Card, Button, Input, Spinner } from '../components/ui';
+import { Card, Button, Spinner } from '../components/ui';
 import { Edit2, Save, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';

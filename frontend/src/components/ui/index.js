@@ -280,11 +280,11 @@ export function PortalHero({
       icon: 'bg-brand-primary/12 text-brand-primary',
     },
     orange: {
-      glow: 'bg-orange-500/10',
-      soft: 'bg-orange-50',
-      text: 'text-orange-600',
-      ring: 'border-orange-100',
-      icon: 'bg-orange-100 text-orange-600',
+      glow: 'bg-[#CDBDF1]/30',
+      soft: 'bg-[#CDBDF1]/20',
+      text: 'text-[#2F3396]',
+      ring: 'border-[#CDBDF1]',
+      icon: 'bg-[#CDBDF1]/40 text-[#2F3396]',
     },
     blue: {
       glow: 'bg-sky-500/10',

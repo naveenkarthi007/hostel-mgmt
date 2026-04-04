@@ -258,7 +258,6 @@ Frontend runs at: `http://localhost:3000`
 
 - Add **Visitor Management** page using the `visitors` table
 - Add **Attendance Tracking** with morning/night roll call
-- Add **Fee Payment** tracking with receipt generation
 - Add **Mess Menu** management
 - Integrate **Email/SMS** notifications for complaints and notices
 - Add **Student portal** (separate login with limited views)

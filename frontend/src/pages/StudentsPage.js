@@ -168,6 +168,7 @@ export default function StudentsPage() {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleExport = async () => {
     try {
       const res = await studentsAPI.exportCSV();

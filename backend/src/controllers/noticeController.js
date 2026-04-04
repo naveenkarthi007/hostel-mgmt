@@ -34,8 +34,7 @@ const create = async (req, res) => {
       [title, content, category || 'general', target || 'all', req.user.id]
     );
     res.status(201).json({ success: true, message: 'Notice posted.', id: result.insertId });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+  } catch (err) { console.error('Error in ' + __filename + ':', err); res.status(500).json({ success: false, message: 'Server error.' });
   }
 };
 
@@ -43,8 +42,7 @@ const remove = async (req, res) => {
   try {
     await pool.query('DELETE FROM notices WHERE id=?', [req.params.id]);
     res.json({ success: true, message: 'Notice deleted.' });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+  } catch (err) { console.error('Error in ' + __filename + ':', err); res.status(500).json({ success: false, message: 'Server error.' });
   }
 };
 

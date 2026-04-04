@@ -10,6 +10,23 @@ CREATE DATABASE IF NOT EXISTS hostel_mgmt
 
 USE hostel_mgmt;
 
+-- Drop tables if they exist to allow clean full-schema reloading
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS attendance;
+DROP TABLE IF EXISTS requests;
+DROP TABLE IF EXISTS hostel_applications;
+DROP TABLE IF EXISTS mess_menu;
+DROP TABLE IF EXISTS leaves;
+DROP TABLE IF EXISTS visitors;
+DROP TABLE IF EXISTS notices;
+DROP TABLE IF EXISTS complaints;
+DROP TABLE IF EXISTS allocations;
+DROP TABLE IF EXISTS students;
+DROP TABLE IF EXISTS floor_warden_assignments;
+DROP TABLE IF EXISTS rooms;
+DROP TABLE IF EXISTS users;
+SET FOREIGN_KEY_CHECKS = 1;
+
 -- ── USERS TABLE (Authentication for Admin, Caretaker, Warden, Student) ──
 CREATE TABLE IF NOT EXISTS users (
   id          INT AUTO_INCREMENT PRIMARY KEY,
@@ -18,11 +35,13 @@ CREATE TABLE IF NOT EXISTS users (
   password    VARCHAR(255) NULL,
   google_id   VARCHAR(255) DEFAULT NULL,
   role        ENUM('admin','caretaker','warden','student') DEFAULT 'student',
+  specialty   VARCHAR(60) DEFAULT NULL,
   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_users_email (email),
   INDEX idx_users_role (role),
-  INDEX idx_users_google_id (google_id)
+  INDEX idx_users_google_id (google_id),
+  INDEX idx_users_specialty (specialty)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── ROOMS TABLE (Hostel Room Information) ──
@@ -33,7 +52,7 @@ CREATE TABLE IF NOT EXISTS rooms (
   floor        TINYINT NOT NULL DEFAULT 1,
   capacity     TINYINT NOT NULL DEFAULT 3,
   occupied     TINYINT NOT NULL DEFAULT 0,
-  room_type    ENUM('single','double','triple') DEFAULT 'triple',
+  room_type    ENUM('single','double','triple', 'quad') DEFAULT 'single',
   status       ENUM('available','occupied','maintenance','reserved') DEFAULT 'available',
   created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -181,19 +200,93 @@ CREATE TABLE IF NOT EXISTS mess_menu (
   UNIQUE KEY unique_meal (day_of_week, meal_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ── HOSTEL APPLICATIONS TABLE (Students apply for hostel) ──
+CREATE TABLE IF NOT EXISTS hostel_applications (
+  id              INT AUTO_INCREMENT PRIMARY KEY,
+  student_id      INT NOT NULL,
+  academic_year   VARCHAR(20) NOT NULL,
+  semester        TINYINT NOT NULL,
+  preferred_block ENUM('A','B','C','D') DEFAULT NULL,
+    preferred_room_type ENUM('single','double','triple','quadruple','1','2','3','4') DEFAULT NULL,
+  reason          TEXT,
+  status          ENUM('pending','approved','rejected') DEFAULT 'pending',
+  reviewed_by     INT DEFAULT NULL,
+  review_note     TEXT,
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+  FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_hostel_app_student (student_id),
+  INDEX idx_hostel_app_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ── REQUESTS TABLE (Room Change & Other Requests) ──
+CREATE TABLE IF NOT EXISTS requests (
+  id              INT AUTO_INCREMENT PRIMARY KEY,
+  student_id      INT NOT NULL,
+  request_type    ENUM('room_change','other') DEFAULT 'other',
+  title           VARCHAR(200) NOT NULL,
+  description     TEXT,
+  status          ENUM('pending','approved','rejected') DEFAULT 'pending',
+  reviewed_by     INT DEFAULT NULL,
+  review_note     TEXT,
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+  FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_req_student (student_id),
+  INDEX idx_req_status (status),
+  INDEX idx_req_type (request_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ── ATTENDANCE TABLE (Biometric / Manual Check-ins) ──
+CREATE TABLE IF NOT EXISTS attendance (
+  id              INT AUTO_INCREMENT PRIMARY KEY,
+  student_id      INT NOT NULL,
+  check_type      ENUM('morning','evening','manual') DEFAULT 'manual',
+  checked_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+  method          ENUM('biometric','manual','qr') DEFAULT 'manual',
+  marked_by       INT DEFAULT NULL,
+  FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+  FOREIGN KEY (marked_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_att_student (student_id),
+  INDEX idx_att_date (checked_at),
+  INDEX idx_att_type (check_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================================
 -- SEED DATA
 -- ============================================================
 
 -- Default Admin User (Password: Admin@1234)
--- Hash: $2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi
 INSERT IGNORE INTO users (name, email, password, role)
 VALUES ('Chief Warden', 'admin@baithotel.edu', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
 
 -- Default Warden User (Password: Warden@123)
--- Hash: $2a$10$g71PM9i4HOCI2ibO7/daOO4IinWOMCF/zuVJ/nGL/h.iPyG70he5C
 INSERT IGNORE INTO users (name, email, password, role)
 VALUES ('Head Warden', 'warden@baithotel.edu', '$2a$10$g71PM9i4HOCI2ibO7/daOO4IinWOMCF/zuVJ/nGL/h.iPyG70he5C', 'warden');
+
+-- Staff Users with Specialties (Password: Staff@123 = $2a$10$g71PM9i4HOCI2ibO7/daOO4IinWOMCF/zuVJ/nGL/h.iPyG70he5C)
+INSERT IGNORE INTO users (name, email, password, role, specialty)
+VALUES ('Raju Electrician', 'electrician@baithotel.edu', '$2a$10$g71PM9i4HOCI2ibO7/daOO4IinWOMCF/zuVJ/nGL/h.iPyG70he5C', 'caretaker', 'electrician');
+
+INSERT IGNORE INTO users (name, email, password, role, specialty)
+VALUES ('Suresh Plumber', 'plumber@baithotel.edu', '$2a$10$g71PM9i4HOCI2ibO7/daOO4IinWOMCF/zuVJ/nGL/h.iPyG70he5C', 'caretaker', 'plumber');
+
+INSERT IGNORE INTO users (name, email, password, role, specialty)
+VALUES ('Ganesh Carpenter', 'carpenter@baithotel.edu', '$2a$10$g71PM9i4HOCI2ibO7/daOO4IinWOMCF/zuVJ/nGL/h.iPyG70he5C', 'caretaker', 'carpenter');
+
+INSERT IGNORE INTO users (name, email, password, role, specialty)
+VALUES ('Lakshmi Cleaner', 'cleaner@baithotel.edu', '$2a$10$g71PM9i4HOCI2ibO7/daOO4IinWOMCF/zuVJ/nGL/h.iPyG70he5C', 'caretaker', 'cleaner');
+
+INSERT IGNORE INTO users (name, email, password, role, specialty)
+VALUES ('Karthik Network Admin', 'network@baithotel.edu', '$2a$10$g71PM9i4HOCI2ibO7/daOO4IinWOMCF/zuVJ/nGL/h.iPyG70he5C', 'caretaker', 'network_admin');
+
+-- Student User Accounts (Password: Student@123 = $2a$10$g71PM9i4HOCI2ibO7/daOO4IinWOMCF/zuVJ/nGL/h.iPyG70he5C)
+INSERT IGNORE INTO users (name, email, password, role) VALUES
+('Rajesh Kumar', 'rajesh@student.edu', '$2a$10$g71PM9i4HOCI2ibO7/daOO4IinWOMCF/zuVJ/nGL/h.iPyG70he5C', 'student'),
+('Priya Singh', 'priya@student.edu', '$2a$10$g71PM9i4HOCI2ibO7/daOO4IinWOMCF/zuVJ/nGL/h.iPyG70he5C', 'student'),
+('Amit Patel', 'amit@student.edu', '$2a$10$g71PM9i4HOCI2ibO7/daOO4IinWOMCF/zuVJ/nGL/h.iPyG70he5C', 'student');
 
 -- Sample Rooms (Block A)
 INSERT IGNORE INTO rooms (room_number, block, floor, capacity, occupied, room_type, status) VALUES
@@ -260,17 +353,17 @@ INSERT IGNORE INTO allocations (student_id, room_id, is_active) VALUES
 (7, 20, 1),
 (8, 25, 1);
 
--- Sample Complaints
+-- Sample Complaints (with auto-assignment IDs for staff seeded above)
 INSERT IGNORE INTO complaints
-(student_id, title, description, category, status, priority) VALUES
-(1, 'Leaking Tap in Bathroom', 'Water leaking from the tap in the bathroom', 'plumbing', 'pending', 'high'),
-(2, 'Electrical Short Circuit', 'Light switch not working properly', 'electrical', 'in_progress', 'medium'),
-(3, 'Door Lock Repair', 'Room door lock is broken', 'carpentry', 'pending', 'medium'),
-(4, 'Dirty Corridor', 'Common area not cleaned for days', 'housekeeping', 'pending', 'low'),
-(5, 'WiFi Connection Issue', 'Internet not working in the room', 'network', 'in_progress', 'medium'),
-(6, 'Mess Food Quality', 'Quality of food has deteriorated', 'mess', 'pending', 'low'),
-(7, 'Broken Window Pane', 'Window glass is cracked', 'carpentry', 'resolved', 'medium'),
-(8, 'Water Blockage', 'Drainage system not working', 'plumbing', 'in_progress', 'high');
+(student_id, title, description, category, status, priority, assigned_to) VALUES
+(1, 'Leaking Tap in Bathroom', 'Water leaking from the tap in the bathroom', 'plumbing', 'pending', 'high', 4),
+(2, 'Electrical Short Circuit', 'Light switch not working properly', 'electrical', 'in_progress', 'medium', 3),
+(3, 'Door Lock Repair', 'Room door lock is broken', 'carpentry', 'pending', 'medium', 5),
+(4, 'Dirty Corridor', 'Common area not cleaned for days', 'housekeeping', 'pending', 'low', 6),
+(5, 'WiFi Connection Issue', 'Internet not working in the room', 'network', 'in_progress', 'medium', 7),
+(6, 'Mess Food Quality', 'Quality of food has deteriorated', 'mess', 'pending', 'low', NULL),
+(7, 'Broken Window Pane', 'Window glass is cracked', 'carpentry', 'resolved', 'medium', 5),
+(8, 'Water Blockage', 'Drainage system not working', 'plumbing', 'in_progress', 'high', 4);
 
 -- Sample Notices
 INSERT IGNORE INTO notices
@@ -288,10 +381,43 @@ INSERT IGNORE INTO visitors
 ('Mr. Singh Father', 'Father', '9234567890', 2, 'inside'),
 ('Sister Priya', 'Sister', '9345678901', 3, 'inside');
 
+-- Sample Hostel Applications
+INSERT IGNORE INTO hostel_applications
+(student_id, academic_year, semester, preferred_block, preferred_room_type, reason, status) VALUES
+(1, '2025-2026', 2, 'A', 'triple', 'Continuing hostel accommodation for next semester', 'approved'),
+(2, '2025-2026', 2, 'A', 'double', 'Need hostel due to distance from campus', 'approved'),
+(3, '2025-2026', 2, 'B', 'triple', 'First time hostel application', 'pending'),
+(9, '2025-2026', 2, 'C', 'single', 'Medical condition requires single room', 'pending');
+
+-- Sample Requests (Room Change)
+INSERT IGNORE INTO requests
+(student_id, request_type, title, description, status) VALUES
+(1, 'room_change', 'Request Room Change to Block B', 'Would like to shift to Block B to be closer to lab facilities.', 'pending'),
+(3, 'room_change', 'Request Single Room', 'Need a single room for better study environment during final semester.', 'pending'),
+(5, 'other', 'Extra Furniture Request', 'Need an additional bookshelf in room for academic materials.', 'approved');
+
+-- Sample Attendance Records
+INSERT IGNORE INTO attendance (student_id, check_type, checked_at, method, marked_by) VALUES
+(1, 'morning', DATE_SUB(NOW(), INTERVAL 1 DAY), 'biometric', 2),
+(1, 'evening', DATE_SUB(NOW(), INTERVAL 1 DAY), 'biometric', 2),
+(2, 'morning', DATE_SUB(NOW(), INTERVAL 1 DAY), 'manual', 2),
+(2, 'evening', DATE_SUB(NOW(), INTERVAL 1 DAY), 'manual', 2),
+(3, 'morning', DATE_SUB(NOW(), INTERVAL 1 DAY), 'biometric', 2),
+(1, 'morning', DATE_SUB(NOW(), INTERVAL 2 DAY), 'biometric', 2),
+(1, 'evening', DATE_SUB(NOW(), INTERVAL 2 DAY), 'biometric', 2),
+(2, 'morning', DATE_SUB(NOW(), INTERVAL 2 DAY), 'manual', 2),
+(1, 'morning', NOW(), 'biometric', 2),
+(2, 'morning', NOW(), 'manual', 2),
+(3, 'morning', NOW(), 'biometric', 2);
+
+-- Sample Leave Requests
+INSERT IGNORE INTO leaves (student_id, from_date, to_date, reason, status, approved_by) VALUES
+(1, '2026-03-20', '2026-03-22', 'Family function at hometown', 'approved', 2),
+(2, '2026-04-01', '2026-04-03', 'Medical appointment', 'pending', NULL),
+(3, '2026-04-05', '2026-04-07', 'Attending workshop in another city', 'pending', NULL);
+
 -- ============================================================
 -- ADDITIONAL PERFORMANCE INDEXES
--- (Using CREATE INDEX IF NOT EXISTS syntax for MySQL 8.0.29+)
--- For older MySQL versions, these will error if indexes already exist
 -- ============================================================
 
 CREATE INDEX idx_students_created_at ON students(created_at);

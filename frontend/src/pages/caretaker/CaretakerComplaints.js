@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { caretakerAPI } from '../../services/api';
 import { Spinner, Badge } from '../../components/ui';
-import { Search, Filter, CheckCircle2 } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 
 const COLORS = {

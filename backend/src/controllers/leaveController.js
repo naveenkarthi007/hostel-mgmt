@@ -122,8 +122,7 @@ const remove = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Leave not found or cannot be deleted.' });
     }
     res.json({ success: true, message: 'Leave request deleted.' });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error.' });
+  } catch (err) { console.error('Error in ' + __filename + ':', err); res.status(500).json({ success: false, message: 'Server error.' });
   }
 };
 

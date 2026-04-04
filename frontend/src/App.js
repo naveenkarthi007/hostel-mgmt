@@ -7,28 +7,43 @@ import Sidebar from './components/layout/Sidebar';
 import StudentSidebar from './components/layout/StudentSidebar';
 import CaretakerSidebar from './components/layout/CaretakerSidebar';
 import WardenSidebar from './components/layout/WardenSidebar';
+
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import StudentsPage from './pages/StudentsPage';
 import RoomsPage from './pages/RoomsPage';
+import FloorWardenPage from './pages/FloorWardenPage';
 import AllocationsPage from './pages/AllocationsPage';
 import ComplaintsPage from './pages/ComplaintsPage';
 import NoticesPage from './pages/NoticesPage';
+import VisitorManagementPage from './pages/VisitorManagementPage';
+import MessMenuPage from './pages/MessMenuPage';
+
+import AdminUsersPage from './pages/admin/UsersPage';
+
 import WardenLeaveApprovals from './pages/warden/WardenLeaveApprovalsPortal';
+import WardenDashboard from './pages/warden/WardenDashboardPortal';
+import WardenStudents from './pages/warden/WardenStudentsPortal';
+import WardenComplaints from './pages/warden/WardenComplaintsPortal';
+import WardenApplicationReview from './pages/warden/WardenApplicationReview';
+import WardenRequestManagement from './pages/warden/WardenRequestManagement';
+import WardenAttendance from './pages/warden/WardenAttendance';
+
 import StudentDashboard from './pages/student/StudentDashboardPortal';
 import StudentProfile from './pages/student/StudentProfile';
 import StudentLeaveRequest from './pages/student/StudentLeaveRequestPortal';
 import StudentComplaints from './pages/student/StudentComplaints';
 import StudentNotices from './pages/student/StudentNoticesPortal';
-import MessMenuPage from './pages/MessMenuPage';
+import StudentHostelApplication from './pages/student/StudentHostelApplication';
+import StudentRequests from './pages/student/StudentRequests';
+import StudentAttendance from './pages/student/StudentAttendance';
+import StudentStaffDirectory from './pages/student/StudentStaffDirectory';
+import StudentVisitorRequests from './pages/student/StudentVisitorRequests';
+
 import CaretakerDashboard from './pages/caretaker/CaretakerDashboardPortal';
 import CaretakerComplaints from './pages/caretaker/CaretakerComplaintsPortal';
-import WardenDashboard from './pages/warden/WardenDashboardPortal';
-import WardenStudents from './pages/warden/WardenStudentsPortal';
-import WardenComplaints from './pages/warden/WardenComplaintsPortal';
-import { Spinner } from './components/ui';
 
-import VisitorManagementPage from './pages/VisitorManagementPage';
+import { Spinner } from './components/ui';
 
 function getHomePath({ user, isAdmin, isCaretaker, isWarden, isStudent }) {
   if (!user) return '/login';
@@ -88,8 +103,11 @@ function AppRoutes() {
             <Sidebar>
               <Routes>
                 <Route path="/"            element={<DashboardPage />} />
+                <Route path="/users"       element={<AdminUsersPage />} />
                 <Route path="/students"    element={<StudentsPage />} />
+                <Route path="/applications" element={<WardenApplicationReview />} />
                 <Route path="/rooms"       element={<RoomsPage />} />
+                <Route path="/floor-wardens" element={<FloorWardenPage />} />
                 <Route path="/allocations" element={<AllocationsPage />} />
                 <Route path="/outpasses"   element={<WardenLeaveApprovals />} />
                 <Route path="/mess-menu"   element={<MessMenuPage />} />
@@ -124,13 +142,16 @@ function AppRoutes() {
           <WardenRoute>
             <WardenSidebar>
               <Routes>
-                <Route path="/"           element={<WardenDashboard />} />
-                <Route path="/students"   element={<WardenStudents />} />
-                <Route path="/outpasses"  element={<WardenLeaveApprovals />} />
-                <Route path="/mess-menu"  element={<MessMenuPage />} />
-                <Route path="/visitors"   element={<VisitorManagementPage />} />
-                <Route path="/complaints" element={<WardenComplaints />} />
-                <Route path="*"           element={<Navigate to="/warden" replace />} />
+                <Route path="/"            element={<WardenDashboard />} />
+                <Route path="/students"    element={<WardenStudents />} />
+                <Route path="/applications" element={<WardenApplicationReview />} />
+                <Route path="/requests"    element={<WardenRequestManagement />} />
+                <Route path="/attendance"  element={<WardenAttendance />} />
+                <Route path="/outpasses"   element={<WardenLeaveApprovals />} />
+                <Route path="/mess-menu"   element={<MessMenuPage />} />
+                <Route path="/visitors"    element={<VisitorManagementPage />} />
+                <Route path="/complaints"  element={<WardenComplaints />} />
+                <Route path="*"            element={<Navigate to="/warden" replace />} />
               </Routes>
             </WardenSidebar>
           </WardenRoute>
@@ -143,13 +164,18 @@ function AppRoutes() {
           <StudentRoute>
             <StudentSidebar>
               <Routes>
-                <Route path="/"           element={<StudentDashboard />} />
-                <Route path="/profile"    element={<StudentProfile />} />
-                <Route path="/outpass"    element={<StudentLeaveRequest />} />
-                <Route path="/mess-menu"  element={<MessMenuPage />} />
-                <Route path="/complaints" element={<StudentComplaints />} />
-                <Route path="/notices"    element={<StudentNotices />} />
-                <Route path="*"           element={<Navigate to="/student" replace />} />
+                <Route path="/"            element={<StudentDashboard />} />
+                <Route path="/profile"     element={<StudentProfile />} />
+                <Route path="/applications" element={<StudentHostelApplication />} />
+                <Route path="/requests"    element={<StudentRequests />} />
+                <Route path="/visitors"    element={<StudentVisitorRequests />} />
+                <Route path="/attendance"  element={<StudentAttendance />} />
+                <Route path="/outpass"     element={<StudentLeaveRequest />} />
+                <Route path="/mess-menu"   element={<MessMenuPage />} />
+                <Route path="/complaints"  element={<StudentComplaints />} />
+                <Route path="/notices"     element={<StudentNotices />} />
+                <Route path="/staff-directory" element={<StudentStaffDirectory />} />
+                <Route path="*"            element={<Navigate to="/student" replace />} />
               </Routes>
             </StudentSidebar>
           </StudentRoute>
